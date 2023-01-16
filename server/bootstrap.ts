@@ -48,7 +48,7 @@ export default ({ strapi }: { strapi: any }) => {
       if (uidMatcher(uid)) {
         console.log('findOne', {uid, id, ctx});
 
-        const entity = await defaultService.findOne(uid, id, ctx);
+        const entity = await defaultService.findOne(uid, id, ctx); // TODO: Check if we can filter with findOne
         if (entity?.softDeleted) {
           return null;
         }
