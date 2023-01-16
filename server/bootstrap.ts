@@ -57,9 +57,10 @@ export default ({ strapi }: { strapi: any }) => {
         return await defaultService.findOne(uid, id, params);
       }
     },
-    wrapParams: (params: any, { uid, action }: { uid: string, action: string }) => {
+    wrapParams: async (params: any, ctx: { uid: string, action: string }) => {
+      const { uid, action } = ctx
       if (uidMatcher(uid)) {
-        console.log('wrapParams', {params, uid, action});
+        console.log('wrapParams', {params, ctx});
 
         return {
           ...params,
