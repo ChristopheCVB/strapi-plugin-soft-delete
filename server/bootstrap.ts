@@ -1,4 +1,4 @@
-import { uidMatcher } from "../utils/utils";
+import { uidMatcher } from "../utils";
 
 export default ({ strapi }: { strapi: any }) => {
   return strapi.entityService.decorate((defaultService) => ({
