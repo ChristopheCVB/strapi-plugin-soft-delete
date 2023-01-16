@@ -2,8 +2,8 @@ import { uidMatcher } from "../utils/utils";
 
 export default ({ strapi }: { strapi: any }) => {
   return strapi.entityService.decorate((defaultService) => ({
-    delete: async (uid, id, ctx) => {
-      // console.log('delete', {uid, id, ctx});
+    delete: async (uid: string, id: number, ctx: any) => {
+      console.log('delete', {uid, id, ctx});
 
       if (uidMatcher(uid)) {
         return await defaultService.update(uid, id, {
@@ -15,8 +15,18 @@ export default ({ strapi }: { strapi: any }) => {
         return await defaultService.delete(uid, id, ctx);
       }
     },
-    findMany: async (uid, ctx) => {
-      // console.log('findMany', {uid, ctx});
+    update: async (uid: string, id: number, ctx: any) => {
+      console.log('update', {uid, id, ctx});
+
+      return await defaultService.update(uid, id, ctx)
+    },
+    create: async (uid: string, ctx: any) => {
+      console.log('create', {uid, ctx});
+
+      return await defaultService.create(uid, ctx)
+    },
+    findMany: async (uid: string, ctx: any) => {
+      console.log('findMany', {uid, ctx});
 
       if (uidMatcher(uid)) {
         return await defaultService.findMany(uid, {
@@ -30,8 +40,8 @@ export default ({ strapi }: { strapi: any }) => {
         return await defaultService.findMany(uid, ctx);
       }
     },
-    findOne: async (uid, id, ctx) => {
-      // console.log('findOne', {uid, id, ctx});
+    findOne: async (uid: string, id: number, ctx: any) => {
+      console.log('findOne', {uid, id, ctx});
 
       if (uidMatcher(uid)) {
         const entity = await defaultService.findOne(uid, id, ctx);
@@ -43,19 +53,19 @@ export default ({ strapi }: { strapi: any }) => {
         return await defaultService.findOne(uid, id, ctx);
       }
     },
-    wrapParams: (ctx, { uid, action }) => {
-      // console.log('wrapParams', {ctx, uid, action});
+    wrapParams: (params: any, { uid, action }: { uid: string, action: string }) => {
+      console.log('wrapParams', {params, uid, action});
 
       if (uidMatcher(uid)) {
         return {
-          ...ctx,
+          ...params,
           filters: {
-            ...ctx.filters,
+            ...params.filters,
             softDeleted: false,
           },
         };
       } else {
-        return ctx;
+        return params;
       }
     },
   }));
