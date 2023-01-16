@@ -2,9 +2,9 @@ import { uidMatcher } from "../utils/utils";
 
 export default ({ strapi }: { strapi: any }) => {
   return strapi.entityService.decorate((defaultService) => ({
-    delete: async (uid: string, id: number, ctx: any) => {
+    delete: async (uid: string, id: number, params: any) => {
       if (uidMatcher(uid)) {
-        console.log('delete', {uid, id, ctx});
+        console.log('delete', {uid, id, params});
 
         return await defaultService.update(uid, id, {
           data: {
@@ -12,49 +12,49 @@ export default ({ strapi }: { strapi: any }) => {
           },
         });
       } else {
-        return await defaultService.delete(uid, id, ctx);
+        return await defaultService.delete(uid, id, params);
       }
     },
-    update: async (uid: string, id: number, ctx: any) => {
+    update: async (uid: string, id: number, params: any) => {
       if (uidMatcher(uid)) {
-        console.log('update', {uid, id, ctx});
-      }
-
-      return await defaultService.update(uid, id, ctx)
-    },
-    create: async (uid: string, ctx: any) => {
-      if (uidMatcher(uid)) {
-        console.log('create', {uid, ctx});
+        console.log('update', {uid, id, params});
       }
 
-      return await defaultService.create(uid, ctx)
+      return await defaultService.update(uid, id, params)
     },
-    findMany: async (uid: string, ctx: any) => {
+    create: async (uid: string, params: any) => {
       if (uidMatcher(uid)) {
-        console.log('findMany', {uid, ctx});
+        console.log('create', {uid, params});
+      }
+
+      return await defaultService.create(uid, params)
+    },
+    findMany: async (uid: string, params: any) => {
+      if (uidMatcher(uid)) {
+        console.log('findMany', {uid, params});
 
         return await defaultService.findMany(uid, {
-          ...ctx,
+          ...params,
           filters: {
-            ...ctx.filters,
+            ...params.filters,
             softDeleted: false,
           },
         });
       } else {
-        return await defaultService.findMany(uid, ctx);
+        return await defaultService.findMany(uid, params);
       }
     },
-    findOne: async (uid: string, id: number, ctx: any) => {
+    findOne: async (uid: string, id: number, params: any) => {
       if (uidMatcher(uid)) {
-        console.log('findOne', {uid, id, ctx});
+        console.log('findOne', {uid, id, params});
 
-        const entity = await defaultService.findOne(uid, id, ctx); // TODO: Check if we can filter with findOne
+        const entity = await defaultService.findOne(uid, id, params); // TODO: Check if we can filter with findOne
         if (entity?.softDeleted) {
           return null;
         }
         return entity;
       } else {
-        return await defaultService.findOne(uid, id, ctx);
+        return await defaultService.findOne(uid, id, params);
       }
     },
     wrapParams: (params: any, { uid, action }: { uid: string, action: string }) => {
