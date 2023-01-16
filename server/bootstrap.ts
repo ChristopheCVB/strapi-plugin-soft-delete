@@ -1,22 +1,21 @@
-import { apiComponentMatcher } from "../utils/utils";
+import { apiComponentMatcher as uidMatcher } from "../utils/utils";
 
 export default async ({ strapi }: { strapi: any }) => {
   return strapi.entityService.decorate((defaultService) => ({
-    delete: async (type, id, ctx) => {
-      if (apiComponentMatcher(type)) {
-        return await defaultService.update(type, id, {
+    delete: async (uid, id, ctx) => {
+      if (uidMatcher(uid)) {
+        return await defaultService.update(uid, id, {
           data: {
             softDeleted: true,
           },
         });
       } else {
-        return await defaultService.delete(type, id, ctx);
+        return await defaultService.delete(uid, id, ctx);
       }
     },
-    findMany: async (type, ctx) => {
-      if (apiComponentMatcher(type)) {
-        console.log("I am getting triggered");
-        return await defaultService.findMany(type, {
+    findMany: async (uid, ctx) => {
+      if (uidMatcher(uid)) {
+        return await defaultService.findMany(uid, {
           ...ctx,
           filters: {
             ...ctx.filters,
@@ -24,22 +23,32 @@ export default async ({ strapi }: { strapi: any }) => {
           },
         });
       } else {
-        return await defaultService.findMany(type, ctx);
+        return await defaultService.findMany(uid, ctx);
       }
     },
-    // findOne: async (type, id, ctx) => {
-    //   console.log("h");
-    //   if (apiComponentMatcher(type)) {
-    //     return await defaultService.findOne(type, id, {
-    //       ...ctx,
-    //       filters: {
-    //         ...ctx.filters,
-    //         softDeleted: false,
-    //       },
-    //     });
-    //   } else {
-    //     return await defaultService.findOne(type, id, ctx);
-    //   }
-    // },
+    findOne: async (uid, id, ctx) => {
+      if (uidMatcher(uid)) {
+        const entity = await defaultService.findOne(uid, id, ctx);
+        if (entity?.softDeleted) {
+          return null;
+        }
+        return entity;
+      } else {
+        return await defaultService.findOne(uid, id, ctx);
+      }
+    },
+    wrapParams: async (ctx, { uid, action }) => {
+      if (uidMatcher(uid)) {
+        return {
+          ...ctx,
+          filters: {
+            ...ctx.filters,
+            softDeleted: true,
+          },
+        };
+      } else {
+        return ctx;
+      }
+    },
   }));
 };
