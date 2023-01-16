@@ -1,6 +1,6 @@
 import { uidMatcher } from "../utils/utils";
 
-export default async ({ strapi }: { strapi: any }) => {
+export default ({ strapi }: { strapi: any }) => {
   return strapi.entityService.decorate((defaultService) => ({
     delete: async (uid, id, ctx) => {
       if (uidMatcher(uid)) {
@@ -37,7 +37,7 @@ export default async ({ strapi }: { strapi: any }) => {
         return await defaultService.findOne(uid, id, ctx);
       }
     },
-    wrapParams: async (ctx, { uid, action }) => {
+    wrapParams: (ctx, { uid, action }) => {
       if (uidMatcher(uid)) {
         return {
           ...ctx,

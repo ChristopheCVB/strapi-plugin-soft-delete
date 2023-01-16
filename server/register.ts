@@ -1,6 +1,6 @@
 import { uidMatcher } from "../utils/utils";
 
-export default async ({ strapi }: { strapi: any }) => {
+export default ({ strapi }: { strapi: any }) => {
   for (let object of []
     .concat(Object.entries(strapi.contentTypes))
     .concat(Object.entries(strapi.components))) {
