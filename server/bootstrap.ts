@@ -2,10 +2,10 @@ import { uidMatcher } from "../utils/utils";
 
 export default ({ strapi }: { strapi: any }) => {
   return strapi.entityService.decorate((defaultService) => ({
-    delete: async (uid, id, ctx) => {
-      // console.log('delete', {uid, id, ctx});
-
+    delete: async (uid: string, id: number, ctx: any) => {
       if (uidMatcher(uid)) {
+        console.log('delete', {uid, id, ctx});
+
         return await defaultService.update(uid, id, {
           data: {
             softDeleted: true,
@@ -15,10 +15,24 @@ export default ({ strapi }: { strapi: any }) => {
         return await defaultService.delete(uid, id, ctx);
       }
     },
-    findMany: async (uid, ctx) => {
-      // console.log('findMany', {uid, ctx});
-
+    update: async (uid: string, id: number, ctx: any) => {
       if (uidMatcher(uid)) {
+        console.log('update', {uid, id, ctx});
+      }
+
+      return await defaultService.update(uid, id, ctx)
+    },
+    create: async (uid: string, ctx: any) => {
+      if (uidMatcher(uid)) {
+        console.log('create', {uid, ctx});
+      }
+
+      return await defaultService.create(uid, ctx)
+    },
+    findMany: async (uid: string, ctx: any) => {
+      if (uidMatcher(uid)) {
+        console.log('findMany', {uid, ctx});
+
         return await defaultService.findMany(uid, {
           ...ctx,
           filters: {
@@ -30,10 +44,10 @@ export default ({ strapi }: { strapi: any }) => {
         return await defaultService.findMany(uid, ctx);
       }
     },
-    findOne: async (uid, id, ctx) => {
-      // console.log('findOne', {uid, id, ctx});
-
+    findOne: async (uid: string, id: number, ctx: any) => {
       if (uidMatcher(uid)) {
+        console.log('findOne', {uid, id, ctx});
+
         const entity = await defaultService.findOne(uid, id, ctx);
         if (entity?.softDeleted) {
           return null;
@@ -43,19 +57,19 @@ export default ({ strapi }: { strapi: any }) => {
         return await defaultService.findOne(uid, id, ctx);
       }
     },
-    wrapParams: (ctx, { uid, action }) => {
-      // console.log('wrapParams', {ctx, uid, action});
-
+    wrapParams: (params: any, { uid, action }: { uid: string, action: string }) => {
       if (uidMatcher(uid)) {
+        console.log('wrapParams', {params, uid, action});
+
         return {
-          ...ctx,
+          ...params,
           filters: {
-            ...ctx.filters,
+            ...params.filters,
             softDeleted: false,
           },
         };
       } else {
-        return ctx;
+        return params;
       }
     },
   }));
