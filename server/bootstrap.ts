@@ -36,8 +36,14 @@ export default ({ strapi }: { strapi: any }) => {
         return await defaultService.findMany(uid, {
           ...params,
           filters: {
-            ...params.filters,
-            softDeleted: false,
+            $and: [
+              {
+                ...params.filters
+              },
+              {
+                softDeleted: false,
+              }
+            ]
           },
         });
       } else {
@@ -65,8 +71,14 @@ export default ({ strapi }: { strapi: any }) => {
         return {
           ...params,
           filters: {
-            ...params.filters,
-            softDeleted: false,
+            $and: [
+              {
+                ...params.filters
+              },
+              {
+                softDeleted: false,
+              }
+            ]
           },
         };
       } else {
