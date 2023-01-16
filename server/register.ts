@@ -1,22 +1,29 @@
-import { apiComponentMatcher } from "../utils/utils";
+import { uidMatcher } from "../utils/utils";
+
 export default async ({ strapi }: { strapi: any }) => {
   for (let object of []
     .concat(Object.entries(strapi.contentTypes))
     .concat(Object.entries(strapi.components))) {
-    const [type, contentType] = object as any;
-    if (apiComponentMatcher(type)) {
-      // console.log(key);
-      contentType.attributes.softDeleted = {
+    const [uid, type] = object as [uid: string, type: any];
+    if (uidMatcher(uid)) {
+      console.log({uid, type});
+      type.attributes.softDeleted = {
         type: "boolean",
         default: false,
-        private: true,
+        // configurable: false,
+        // writable: false,
         // visible: false,
+        // useJoinTable: false,
+        private: true,
       };
-      contentType.__schema__.attributes.softDeleted = {
+      type.__schema__.attributes.softDeleted = {
         type: "boolean",
         default: false,
-        private: true,
+        // configurable: false,
+        // writable: false,
         // visible: false,
+        // useJoinTable: false,
+        private: true,
       };
     }
   }

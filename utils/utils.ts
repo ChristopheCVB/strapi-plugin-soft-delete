@@ -1,3 +1,4 @@
-export const apiComponentMatcher = (serviceName: string) => {
-  return serviceName.match(/^api::/) || !serviceName.match(/^\w+::/);
+export const uidMatcher = (uid: string) => {
+  // Content Type (Collection or Single) || Component
+  return uid.match(/^api::/) || !uid.match(/^\w+::/);
 };

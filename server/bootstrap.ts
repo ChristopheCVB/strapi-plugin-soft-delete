@@ -1,4 +1,4 @@
-import { apiComponentMatcher as uidMatcher } from "../utils/utils";
+import { uidMatcher } from "../utils/utils";
 
 export default async ({ strapi }: { strapi: any }) => {
   return strapi.entityService.decorate((defaultService) => ({
