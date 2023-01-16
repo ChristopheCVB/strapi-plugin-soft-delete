@@ -6,7 +6,7 @@ export default async ({ strapi }: { strapi: any }) => {
     .concat(Object.entries(strapi.components))) {
     const [uid, type] = object as [uid: string, type: any];
     if (uidMatcher(uid)) {
-      console.log({uid, type});
+      // console.log({uid, type});
       type.attributes.softDeleted = {
         type: "boolean",
         default: false,
