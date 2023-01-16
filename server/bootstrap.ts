@@ -43,7 +43,8 @@ export default async ({ strapi }: { strapi: any }) => {
           ...ctx,
           filters: {
             ...ctx.filters,
-            softDeleted: true,
+            softDeleted: true, // FIXME: for test purpose
+            // softDeleted: false,
           },
         };
       } else {
