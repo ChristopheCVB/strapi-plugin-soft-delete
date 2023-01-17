@@ -9,18 +9,18 @@ export default ({ strapi }: { strapi: any }) => {
     const [uid, type] = object as [uid: string, type: any];
     if (uidMatcher(uid)) {
       console.log({uid, type});
-      type.attributes.softDeleted = {
-        type: "boolean",
-        default: false,
+      type.attributes.softDeletedAt = {
+        type: "datetime",
+        default: null,
         // configurable: false,
         // writable: false,
         // visible: false,
         // useJoinTable: false,
         private: true,
       };
-      type.__schema__.attributes.softDeleted = {
-        type: "boolean",
-        default: false,
+      type.__schema__.attributes.softDeletedAt = {
+        type: "datetime",
+        default: null,
         // configurable: false,
         // writable: false,
         // visible: false,

@@ -1,89 +1,96 @@
 import { uidMatcher } from "../utils";
 
+const sdWrapParams = async (defaultService: any, opts: any, ctx: { uid: string, action: string }) => {
+  const { uid, action } = ctx
+  const wrappedParams = await defaultService.wrapParams(opts, ctx)
+  if (!uidMatcher(uid)) {
+    return wrappedParams;
+  }
+  console.log('wrapParams', {wrappedParams, ctx});
+
+  return {
+    ...wrappedParams,
+    filters: {
+      $and: [
+        {
+          ...wrappedParams.filters
+        },
+        {
+          softDeletedAt: {
+            $null: true
+          }
+        }
+      ]
+    },
+  };
+}
+
 export default ({ strapi }: { strapi: any }) => {
   return strapi.entityService.decorate((defaultService) => ({
-    delete: async (uid: string, id: number, params: any) => {
-      if (uidMatcher(uid)) {
-        console.log('delete', {uid, id, params});
+    delete: async (uid: string, id: number, opts: any) => {
+      if (!uidMatcher(uid)) {
+        return await defaultService.delete(uid, id, opts);
+      }
+      console.log('delete', {uid, id, opts});
 
-        return await defaultService.update(uid, id, {
+      const wrappedParams = await defaultService.wrapParams(opts, { uid, action: 'delete' })
+
+      return await defaultService.update(uid, id, {
+        ...wrappedParams,
+        data: {
+          ...wrappedParams.data,
+          softDeletedAt: new Date().getTime(),
+        },
+      });
+    },
+    deleteMany: async (uid: string, opts: any) => {
+      if (!uidMatcher(uid)) {
+        return await defaultService.deleteMany(uid, opts);
+      }
+      console.log('deleteMany', {uid, opts});
+
+      const wrappedParams = await defaultService.wrapParams(opts, { uid, action: 'deleteMany' })
+
+      const entitiesToDelete = await defaultService.findMany(uid, wrappedParams)
+      const deletedEntities = []
+      for (let entityToDelete of entitiesToDelete) {
+        const deletedEntity = await defaultService.update(uid, entityToDelete.id, {
           data: {
-            softDeleted: true,
+            softDeletedAt: new Date().getTime(),
           },
-        });
-      } else {
-        return await defaultService.delete(uid, id, params);
-      }
-    },
-    update: async (uid: string, id: number, params: any) => {
-      if (uidMatcher(uid)) {
-        console.log('update', {uid, id, params});
-      }
-
-      return await defaultService.update(uid, id, params)
-    },
-    create: async (uid: string, params: any) => {
-      if (uidMatcher(uid)) {
-        console.log('create', {uid, params});
-      }
-
-      return await defaultService.create(uid, params)
-    },
-    findMany: async (uid: string, params: any) => {
-      if (uidMatcher(uid)) {
-        console.log('findMany', {uid, params});
-
-        return await defaultService.findMany(uid, {
-          ...params,
-          filters: {
-            $and: [
-              {
-                ...params.filters
-              },
-              {
-                softDeleted: false,
-              }
-            ]
-          },
-        });
-      } else {
-        return await defaultService.findMany(uid, params);
-      }
-    },
-    findOne: async (uid: string, id: number, params: any) => {
-      if (uidMatcher(uid)) {
-        console.log('findOne', {uid, id, params});
-
-        const entity = await defaultService.findOne(uid, id, params);
-        if (entity?.softDeleted) {
-          return null;
+        })
+        if (deletedEntity) {
+          deletedEntities.push(deletedEntity)
         }
-        return entity;
-      } else {
-        return await defaultService.findOne(uid, id, params);
       }
-    },
-    wrapParams: async (params: any, ctx: { uid: string, action: string }) => {
-      const { uid, action } = ctx
-      if (uidMatcher(uid)) {
-        console.log('wrapParams', {params, ctx});
 
-        return {
-          ...params,
-          filters: {
-            $and: [
-              {
-                ...params.filters
-              },
-              {
-                softDeleted: false,
-              }
-            ]
-          },
-        };
-      } else {
-        return params;
+      return deletedEntities
+    },
+    findOne: async (uid: string, id: number, opts: any) => {
+      if (!uidMatcher(uid)) {
+        return await defaultService.findOne(uid, id, opts);
       }
+      console.log('findOne', {uid, id, opts});
+
+      const wrappedParams = await defaultService.wrapParams(opts, { uid, action: 'findOne' })
+
+      const entities = await defaultService.findMany(uid, {
+        ...wrappedParams,
+        filters: {
+          id,
+          softDeletedAt: {
+            $null: true
+          }
+        }
+      });
+
+      if (entities.length === 0) {
+        return null;
+      }
+      return entities[0];
+    },
+    wrapParams: async (opts: any, ctx: { uid: string, action: string }) => {
+      return await sdWrapParams(defaultService, opts, ctx)
     },
   }));
 };
