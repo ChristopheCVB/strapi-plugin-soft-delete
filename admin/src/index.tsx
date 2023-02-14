@@ -40,10 +40,11 @@ export default {
   },
 
   bootstrap(app) {},
-  async registerTrads(app) {
+
+  async registerTrads(app) { // registerTranslations
     const { locales } = app;
 
-    const importedTrads = await Promise.all(
+    const importedTranslations = await Promise.all(
       locales.map(locale => {
         return import(`./translations/${locale}.json`)
           .then(({ default: data }) => {
@@ -61,6 +62,6 @@ export default {
       })
     );
 
-    return Promise.resolve(importedTrads);
+    return Promise.resolve(importedTranslations);
   },
 };

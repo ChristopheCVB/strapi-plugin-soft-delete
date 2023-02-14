@@ -4,6 +4,7 @@
   "description": "Add a soft delete feature to your project",
   "strapi": {
     "name": "soft-delete",
+    "displayName": "Soft Delete",
     "description": "Add a soft delete feature to your project",
     "kind": "plugin"
   },
