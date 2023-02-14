@@ -5,8 +5,8 @@
  */
 
 import React from 'react';
-import { Puzzle } from '@strapi/icons';
+import { Archive } from '@strapi/icons';
 
-const PluginIcon: React.VoidFunctionComponent = () => <Puzzle />;
+const PluginIcon: React.VoidFunctionComponent = () => <Archive />;
 
 export default PluginIcon;
