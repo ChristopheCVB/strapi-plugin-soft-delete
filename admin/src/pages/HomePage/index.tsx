@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { useState } from 'react'
 import pluginId from '../../pluginId';
 import {
   Flex,
@@ -15,33 +14,28 @@ import {
   SubNavSection,
   SubNavSections,
   SubNavLink,
-  SubNavLinkSection,
 } from '@strapi/design-system';
-import { ExclamationMarkCircle, Apps } from '@strapi/icons'
 
+const { useState } = React;
 
 const HomePage: React.VoidFunctionComponent = () => {
   const [search, setSearch] = useState('');
-  const links = [{
-    id: 1,
-    label: 'Addresses',
-    icon: <ExclamationMarkCircle />,
-    to: '/address'
-  }, {
-    id: 2,
-    label: 'Categories',
-    to: '/category'
-  }, {
-    id: 3,
-    label: 'Cities',
-    icon: <Apps />,
-    to: '/city',
-    active: true
-  }, {
-    id: 4,
-    label: 'Countries',
-    to: '/country'
-  }];
+  const softDeletableCollectionTypes = [
+    {
+      id: 1,
+      label: 'Collection',
+      to: `/plugins/${pluginId}/collections`,
+      active: true,
+    }
+  ];
+  const softDeletableSingleTypes = [
+    {
+      id: 1,
+      label: 'Single',
+      to: `/plugins/${pluginId}/singles`,
+      active: false,
+    }
+  ];
   return (
   <Flex>
     <Box style={{
@@ -50,21 +44,23 @@ const HomePage: React.VoidFunctionComponent = () => {
       <SubNav ariaLabel="Soft Delete sub nav">
         <SubNavHeader searchable value={search} onClear={() => setSearch('')} onChange={e => setSearch(e.target.value)} label="Soft Delete" searchLabel="Search..." />
         <SubNavSections>
-          <SubNavSection label="Collection Type" collapsable badgeLabel={links.length.toString()}>
+          <SubNavSection label="Collection Types" collapsable badgeLabel={softDeletableCollectionTypes.length.toString()}>
             {
-              links.map(link =>
-                <SubNavLink to={link.to} active={link.active} key={link.id}>
-                  {link.label}
+              softDeletableCollectionTypes.map(collectionType =>
+                <SubNavLink to={collectionType.to} active={collectionType.active} key={collectionType.id}>
+                  {collectionType.label}
                 </SubNavLink>
               )
             }
           </SubNavSection>
-          <SubNavSection label="Single Type" collapsable badgeLabel={links.length.toString()}>
-            <SubNavLinkSection label="Default">
-              {links.map(link => <SubNavLink to={link.to} isSubSectionChild key={link.id}>
-              {link.label}
-              </SubNavLink>)}
-            </SubNavLinkSection>
+          <SubNavSection label="Single Types" collapsable badgeLabel={softDeletableSingleTypes.length.toString()}>
+            {
+              softDeletableSingleTypes.map(singleType =>
+                <SubNavLink to={singleType.to} active={singleType.active} key={singleType.id}>
+                  {singleType.label}
+                </SubNavLink>
+              )
+            }
           </SubNavSection>
         </SubNavSections>
       </SubNav>
