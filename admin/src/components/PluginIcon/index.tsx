@@ -5,8 +5,8 @@
  */
 
 import React from 'react';
-import { Archive } from '@strapi/icons';
+import { Trash } from '@strapi/icons';
 
-const PluginIcon: React.VoidFunctionComponent = () => <Archive />;
+const PluginIcon: React.VoidFunctionComponent = () => <Trash />;
 
 export default PluginIcon;
