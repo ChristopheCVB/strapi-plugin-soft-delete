@@ -13,7 +13,7 @@ export default {
       to: `/plugins/${pluginId}`,
       icon: PluginIcon,
       intlLabel: {
-        id: `${pluginId}.plugin.name`,
+        id: `${pluginId}.name`,
         defaultMessage: name,
       },
       Component: async () => {
