@@ -16,26 +16,35 @@ import {
   SubNavLink,
 } from '@strapi/design-system';
 
-const { useState } = React;
+const { useState, useEffect } = React;
+import { useFetchClient } from '@strapi/helper-plugin';
+import { uidMatcher } from '../../../../utils';
 
 const HomePage: React.VoidFunctionComponent = () => {
   const [search, setSearch] = useState('');
-  const softDeletableCollectionTypes = [
-    {
-      id: 1,
-      label: 'Collection',
-      to: `/plugins/${pluginId}/collections`,
-      active: true,
-    }
-  ];
-  const softDeletableSingleTypes = [
-    {
-      id: 1,
-      label: 'Single',
-      to: `/plugins/${pluginId}/singles`,
-      active: false,
-    }
-  ];
+  const { get } = useFetchClient();
+
+  const [softDeletableCollectionTypes, setSoftDeletableCollectionTypes] = useState<{label: string, to: string}[]>([]);
+  const [softDeletableSingleTypes, setSoftDeletableSingleTypes] = useState<{label: string, to: string}[]>([]);
+  useEffect(() => {
+    get('/content-type-builder/content-types').then(response => {
+      setSoftDeletableCollectionTypes(
+        response.data.data.filter(contentType => uidMatcher(contentType.uid) && contentType.schema.kind === 'collectionType')
+          .map(contentType => ({
+            label: contentType.schema.displayName,
+            to: `/plugins/${pluginId}/colectionType/${contentType.uid}`,
+          }))
+      );
+      setSoftDeletableSingleTypes(
+        response.data.data.filter(contentType => uidMatcher(contentType.uid) && contentType.schema.kind === 'singleType')
+          .map(contentType => ({
+            label: contentType.schema.displayName,
+            to: `/plugins/${pluginId}/singleType/${contentType.uid}`,
+          }))
+      );
+    });
+  }, [])
+
   return (
   <Flex>
     <Box style={{
@@ -46,8 +55,8 @@ const HomePage: React.VoidFunctionComponent = () => {
         <SubNavSections>
           <SubNavSection label="Collection Types" collapsable badgeLabel={softDeletableCollectionTypes.length.toString()}>
             {
-              softDeletableCollectionTypes.map(collectionType =>
-                <SubNavLink to={collectionType.to} active={collectionType.active} key={collectionType.id}>
+              softDeletableCollectionTypes.map((collectionType, index) =>
+                <SubNavLink to={collectionType.to} active={index === 0} key={index}>
                   {collectionType.label}
                 </SubNavLink>
               )
@@ -55,8 +64,8 @@ const HomePage: React.VoidFunctionComponent = () => {
           </SubNavSection>
           <SubNavSection label="Single Types" collapsable badgeLabel={softDeletableSingleTypes.length.toString()}>
             {
-              softDeletableSingleTypes.map(singleType =>
-                <SubNavLink to={singleType.to} active={singleType.active} key={singleType.id}>
+              softDeletableSingleTypes.map((singleType, index) =>
+                <SubNavLink to={singleType.to} key={index}>
                   {singleType.label}
                 </SubNavLink>
               )

@@ -12,10 +12,10 @@ export default ({ strapi }: { strapi: any }) => {
       const softDeletedAt = {
         type: "datetime",
         default: null,
-        // configurable: false,
-        // writable: false,
-        // visible: false,
-        // useJoinTable: false,
+        configurable: false,
+        writable: false,
+        visible: false,
+        useJoinTable: false,
         private: true,
       };
       type.attributes.softDeletedAt = softDeletedAt;
