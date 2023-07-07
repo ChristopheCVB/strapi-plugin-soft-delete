@@ -8,7 +8,7 @@ export default ({ strapi }: { strapi: any }) => {
   ) {
     const [uid, type] = object as [uid: string, type: any];
     if (uidMatcher(uid)) {
-      console.log({uid, type});
+      console.log({uid, type, createdBy: type.attributes.createdBy});
       const softDeletedAt = {
         type: "datetime",
         default: null,
@@ -20,6 +20,19 @@ export default ({ strapi }: { strapi: any }) => {
       };
       type.attributes.softDeletedAt = softDeletedAt;
       type.__schema__.attributes.softDeletedAt = softDeletedAt;
+      const softDeletedBy = {
+        type: "relation",
+        relation: "oneToOne",
+        target: "admin::user",
+        default: null,
+        configurable: false,
+        writable: false,
+        visible: false,
+        useJoinTable: false,
+        private: true,
+      };
+      type.attributes.softDeletedBy = softDeletedBy;
+      type.__schema__.attributes.softDeletedBy = softDeletedBy;
     }
   }
 };

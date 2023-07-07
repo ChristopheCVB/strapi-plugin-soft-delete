@@ -40,6 +40,7 @@ export default ({ strapi }: { strapi: any }) => {
         data: {
           ...wrappedParams.data,
           softDeletedAt: new Date().getTime(),
+          // TODO: softDeletedBy
         },
       });
     },
@@ -58,6 +59,7 @@ export default ({ strapi }: { strapi: any }) => {
         const deletedEntity = await defaultService.update(uid, entityToDelete.id, {
           data: {
             softDeletedAt: new Date().getTime(),
+            // TODO: softDeletedBy
           },
         })
         if (deletedEntity) {
