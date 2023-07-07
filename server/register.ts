@@ -8,7 +8,7 @@ export default ({ strapi }: { strapi: any }) => {
   ) {
     const [uid, type] = object as [uid: string, type: any];
     if (uidMatcher(uid)) {
-      console.log({uid, type, createdBy: type.attributes.createdBy});
+      console.log({uid, type});
       const softDeletedAt = {
         type: "datetime",
         default: null,

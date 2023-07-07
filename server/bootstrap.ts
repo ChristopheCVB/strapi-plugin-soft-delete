@@ -6,7 +6,6 @@ const sdWrapParams = async (defaultService: any, opts: any, ctx: { uid: string, 
   if (!uidMatcher(uid)) {
     return wrappedParams;
   }
-  console.log('wrapParams', {wrappedParams, ctx});
 
   return {
     ...wrappedParams,
@@ -31,7 +30,6 @@ export default ({ strapi }: { strapi: any }) => {
       if (!uidMatcher(uid)) {
         return await defaultService.delete(uid, id, opts);
       }
-      console.log('delete', {uid, id, opts});
 
       const wrappedParams = await defaultService.wrapParams(opts, { uid, action: 'delete' })
 
@@ -49,7 +47,6 @@ export default ({ strapi }: { strapi: any }) => {
       if (!uidMatcher(uid)) {
         return await defaultService.deleteMany(uid, opts);
       }
-      console.log('deleteMany', {uid, opts});
 
       const wrappedParams = await defaultService.wrapParams(opts, { uid, action: 'deleteMany' })
 
@@ -74,7 +71,6 @@ export default ({ strapi }: { strapi: any }) => {
       if (!uidMatcher(uid)) {
         return await defaultService.findOne(uid, id, opts);
       }
-      console.log('findOne', {uid, id, opts});
 
       const wrappedParams = await defaultService.wrapParams(opts, { uid, action: 'findOne' })
 
