@@ -15,7 +15,7 @@ const App: React.VoidFunctionComponent = () => {
   return (
     <div>
       <Switch>
-        <Route path={`/plugins/${pluginId}`} component={HomePage} exact />
+        <Route path={`/plugins/${pluginId}`} component={HomePage} />
         <Route component={NotFound} />
       </Switch>
     </div>

@@ -43,6 +43,7 @@ export default ({ strapi }: { strapi: any }) => {
         },
       });
     },
+
     deleteMany: async (uid: string, opts: any) => {
       if (!uidMatcher(uid)) {
         return await defaultService.deleteMany(uid, opts);
@@ -66,6 +67,7 @@ export default ({ strapi }: { strapi: any }) => {
 
       return deletedEntities
     },
+
     findOne: async (uid: string, id: number, opts: any) => {
       if (!uidMatcher(uid)) {
         return await defaultService.findOne(uid, id, opts);
@@ -89,6 +91,7 @@ export default ({ strapi }: { strapi: any }) => {
       }
       return entities[0];
     },
+
     wrapParams: async (opts: any, ctx: { uid: string, action: string }) => {
       return await sdWrapParams(defaultService, opts, ctx)
     },

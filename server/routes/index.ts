@@ -1,8 +1,8 @@
 export default [
   {
     method: 'GET',
-    path: '/',
-    handler: 'myController.index',
+    path: '/:kind/:uid',
+    handler: 'controller.findMany',
     config: {
       policies: [],
     },
