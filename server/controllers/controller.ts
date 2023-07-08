@@ -6,4 +6,16 @@ export default ({ strapi }: { strapi: Strapi }) => ({
 
     return service.findMany(ctx);
   },
+
+  delete(ctx) {
+    const service = strapi.plugin('soft-delete').service('service');
+
+    return service.delete(ctx);
+  },
+
+  restore(ctx) {
+    const service = strapi.plugin('soft-delete').service('service');
+
+    return service.restore(ctx);
+  },
 });

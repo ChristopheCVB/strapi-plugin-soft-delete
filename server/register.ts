@@ -15,20 +15,17 @@ export default ({ strapi }: { strapi: any }) => {
         configurable: false,
         writable: false,
         visible: false,
-        useJoinTable: false,
         private: true,
       };
       type.attributes.softDeletedAt = softDeletedAt;
       type.__schema__.attributes.softDeletedAt = softDeletedAt;
-      const softDeletedBy = {
+      const softDeletedBy = { // FIXME: IDK how this works
         type: "relation",
-        relation: "oneToOne",
+        relation: "oneToMany",
         target: "admin::user",
-        default: null,
         configurable: false,
         writable: false,
         visible: false,
-        useJoinTable: false,
         private: true,
       };
       type.attributes.softDeletedBy = softDeletedBy;

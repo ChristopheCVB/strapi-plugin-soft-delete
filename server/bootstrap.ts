@@ -33,12 +33,14 @@ export default ({ strapi }: { strapi: any }) => {
 
       const wrappedParams = await defaultService.wrapParams(opts, { uid, action: 'delete' })
 
+      const ctx = strapi.requestContext.get()
+
       return await defaultService.update(uid, id, {
         ...wrappedParams,
         data: {
           ...wrappedParams.data,
           softDeletedAt: new Date().getTime(),
-          // TODO: softDeletedBy
+          // softDeletedBy: [ctx.state.user.id], // FIXME: IDK how this works
         },
       });
     },
@@ -50,13 +52,15 @@ export default ({ strapi }: { strapi: any }) => {
 
       const wrappedParams = await defaultService.wrapParams(opts, { uid, action: 'deleteMany' })
 
+      const ctx = strapi.requestContext.get()
+
       const entitiesToDelete = await defaultService.findMany(uid, wrappedParams)
       const deletedEntities = []
       for (let entityToDelete of entitiesToDelete) {
         const deletedEntity = await defaultService.update(uid, entityToDelete.id, {
           data: {
             softDeletedAt: new Date().getTime(),
-            // TODO: softDeletedBy
+            // softDeletedBy: [ctx.state.user.id], // FIXME: IDK how this works
           },
         })
         if (deletedEntity) {
