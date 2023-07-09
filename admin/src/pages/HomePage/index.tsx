@@ -52,18 +52,28 @@ declare type ContentTypeItem = {
   to: string,
 }
 
+declare type EntryItem = {
+  id: number,
+  softDeletedAt: string,
+  softDeletedBy: {
+    username: string,
+    email: string,
+  }[],
+  [mainField: string]: unknown,
+}
+
 const HomePage: React.VoidFunctionComponent = () => {
   const { formatDate } = useIntl();
   const params = useParams();
   const history = useHistory();
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(''); // TODO: Implement Conent Type search
   const { get, put } = useFetchClient();
   const { allPermissions } = useRBACProvider();
 
   const [softDeletableCollectionTypes, setSoftDeletableCollectionTypes] = useState<ContentTypeItem[]>([]);
   const [softDeletableSingleTypes, setSoftDeletableSingleTypes] = useState<ContentTypeItem[]>([]);
   const [mainField, setMainField] = useState<string| null>(null);
-  const [entries, setEntries] = useState<any[]>([]);
+  const [entries, setEntries] = useState<EntryItem[]>([]);
 
   const activeContentType = softDeletableCollectionTypes.concat(softDeletableSingleTypes).filter(contentType => params.uid === contentType.uid)[0]
   const canRestore = allPermissions.some(permission => permission.action === 'plugin::soft-delete.explorer.restore' && permission.subject === activeContentType?.uid);
@@ -206,7 +216,7 @@ const HomePage: React.VoidFunctionComponent = () => {
                       aria-label="Select all entries"
                       disabled={!canRestore && !canDeletePermanantly || !entries.length}
                       checked={entries.length && selectedEntriesIds.length === entries.length}
-                      indeterminate={selectedEntriesIds.length && selectedEntriesIds.length !== entries.length}
+                      indeterminate={entries.length && selectedEntriesIds.length && selectedEntriesIds.length !== entries.length}
                       onChange={() => selectedEntriesIds.length === entries.length ? setSelectedEntriesIds([]) : setSelectedEntriesIds(entries.map(entry => entry.id))}
                     />
                   </Th>
