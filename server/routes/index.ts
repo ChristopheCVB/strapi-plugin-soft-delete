@@ -4,7 +4,7 @@ export default [
     path: '/:kind/:uid',
     handler: 'controller.findMany',
     config: {
-      policies: [],
+      policies: ['canRead'],
     },
   },
   {
@@ -12,7 +12,7 @@ export default [
     path: '/:kind/:uid/:id',
     handler: 'controller.findOne',
     config: {
-      policies: [],
+      policies: ['canRead'],
     },
   },
   {
@@ -20,7 +20,7 @@ export default [
     path: '/delete/:kind/:uid/:id',
     handler: 'controller.delete',
     config: {
-      policies: [],
+      policies: ['canDelete'],
     },
   },
   {
@@ -28,7 +28,7 @@ export default [
     path: '/restore/:kind/:uid/:id',
     handler: 'controller.restore',
     config: {
-      policies: [],
+      policies: ['canRestore'],
     },
   },
   {
@@ -36,7 +36,7 @@ export default [
     path: '/delete/:kind/:uid',
     handler: 'controller.deleteMany',
     config: {
-      policies: [],
+      policies: ['canDelete'],
     },
   },
   {
@@ -44,7 +44,7 @@ export default [
     path: '/restore/:kind/:uid',
     handler: 'controller.restoreMany',
     config: {
-      policies: [],
+      policies: ['canRestore'],
     },
   },
 ];

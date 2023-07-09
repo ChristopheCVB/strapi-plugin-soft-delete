@@ -1,11 +1,8 @@
 import React from 'react';
 import { prefixPluginTranslations } from '@strapi/helper-plugin';
-import pluginPkg from '../../package.json';
-import pluginId from './pluginId';
+import { pluginId, name } from '../../utils/plugin';
 import Initializer from './components/Initializer';
 import PluginIcon from './components/PluginIcon';
-
-const name = pluginPkg.strapi.name;
 
 export default {
   register(app) {
@@ -22,11 +19,10 @@ export default {
         return component;
       },
       permissions: [
-        // Uncomment to set the permissions of the plugin here
-        // {
-        //   action: '', // the action name should be plugin::plugin-name.actionType
-        //   subject: null,
-        // },
+        {
+          action: 'plugin::soft-delete.read',
+          subject: null,
+        },
       ],
     });
     const plugin = {

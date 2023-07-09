@@ -1,4 +1,5 @@
 import { uidMatcher } from "../utils";
+import { pluginId } from "../utils/plugin";
 
 const sdWrapParams = async (defaultService: any, opts: any, ctx: { uid: string, action: string }) => {
   const { uid, action } = ctx
@@ -24,8 +25,32 @@ const sdWrapParams = async (defaultService: any, opts: any, ctx: { uid: string, 
   };
 }
 
-export default ({ strapi }: { strapi: any }) => {
-  return strapi.entityService.decorate((defaultService) => ({
+export default async ({ strapi }: { strapi: any }) => {
+  // Setup Permissions
+  const actions = [
+    {
+      uid: 'read',
+      displayName: 'Read',
+      pluginName: pluginId,
+      section: 'plugins',
+    },
+    {
+      uid: 'restore',
+      displayName: 'Restore',
+      pluginName: pluginId,
+      section: 'plugins',
+    },
+    {
+      uid: 'delete',
+      displayName: 'Delete',
+      pluginName: pluginId,
+      section: 'plugins',
+    }
+  ];
+  await strapi.admin.services.permission.actionProvider.registerMany(actions);
+
+  // Decorate Entity Services
+  strapi.entityService.decorate((defaultService) => ({
     delete: async (uid: string, id: number, opts: any) => {
       if (!uidMatcher(uid)) {
         return await defaultService.delete(uid, id, opts);

@@ -4,7 +4,7 @@ export default ({ strapi }: { strapi: any }) => {
   for (
     let object of []
     .concat(Object.entries(strapi.contentTypes))
-    // .concat(Object.entries(strapi.components)) // FIXME: Deleting a compoment doesn't use the entityService
+    // .concat(Object.entries(strapi.components)) // TODO: Deleting a compoment doesn't use the entityService
   ) {
     const [uid, type] = object as [uid: string, type: any];
     if (uidMatcher(uid)) {
