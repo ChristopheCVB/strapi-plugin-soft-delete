@@ -11,7 +11,6 @@ export default ({ strapi }: { strapi: any }) => {
       console.log({uid, type});
       const softDeletedAt = {
         type: "datetime",
-        default: null,
         configurable: false,
         writable: false,
         visible: false,
@@ -19,7 +18,7 @@ export default ({ strapi }: { strapi: any }) => {
       };
       type.attributes.softDeletedAt = softDeletedAt;
       type.__schema__.attributes.softDeletedAt = softDeletedAt;
-      const softDeletedBy = { // FIXME: IDK how this works
+      const softDeletedBy = {
         type: "relation",
         relation: "oneToMany",
         target: "admin::user",

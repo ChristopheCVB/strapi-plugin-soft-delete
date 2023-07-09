@@ -40,7 +40,7 @@ export default ({ strapi }: { strapi: any }) => {
         data: {
           ...wrappedParams.data,
           softDeletedAt: new Date().getTime(),
-          // softDeletedBy: [ctx.state.user.id], // FIXME: IDK how this works
+          softDeletedBy: [ctx.state.user.id],
         },
       });
     },
@@ -60,7 +60,7 @@ export default ({ strapi }: { strapi: any }) => {
         const deletedEntity = await defaultService.update(uid, entityToDelete.id, {
           data: {
             softDeletedAt: new Date().getTime(),
-            // softDeletedBy: [ctx.state.user.id], // FIXME: IDK how this works
+            softDeletedBy: [ctx.state.user.id],
           },
         })
         if (deletedEntity) {

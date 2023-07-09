@@ -1,6 +1,19 @@
 import { Strapi } from '@strapi/strapi';
 
 export default ({ strapi }: { strapi: Strapi }) => ({
+  findOne(ctx) {
+    return strapi.query(ctx.params.uid).findOne({
+      select: '*',
+      where: {
+        id: ctx.params.id,
+        softDeletedAt: {
+          $ne: null,
+        },
+      },
+      populate: ['softDeletedBy']
+    });
+  },
+
   findMany(ctx) {
     return strapi.query(ctx.params.uid).findMany({
       select: '*',
@@ -12,6 +25,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       orderBy: {
         softDeletedAt: 'desc',
       },
+      populate: ['softDeletedBy']
     });
   },
 
@@ -25,6 +39,8 @@ export default ({ strapi }: { strapi: Strapi }) => ({
   },
 
   restore(ctx) {
+    // FIXME: Handle ctx.params.kind === singleType
+    // FIXME: Handle publicationState
     return strapi.query(ctx.params.uid).update({
       select: '*',
       where: {
@@ -32,10 +48,33 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       },
       data: {
         softDeletedAt: null,
-        // softDeletedBy: null, // FIXME: IDK how this works
+        softDeletedBy: [],
       },
     });
   },
 
-  // TODO: findOne, deleteMany, restoreMany
+  deleteMany(ctx) {
+    return strapi.query(ctx.params.uid).deleteMany({
+      select: '*',
+      where: {
+        id: ctx.request.body.data.ids,
+      },
+    });
+  },
+
+  restoreMany(ctx) {
+    // FIXME: Handle ctx.params.kind === singleType
+    // FIXME: Handle publicationState
+    return strapi.query(ctx.params.uid).updateMany({
+      select: '*',
+      where: {
+        id: ctx.request.body.data.ids,
+      },
+      data: {
+        softDeletedAt: null,
+        softDeletedBy: [],
+      },
+    });
+  },
+
 });

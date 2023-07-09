@@ -34,31 +34,34 @@ import {
   ModalFooter,
   Button,
 } from '@strapi/design-system';
-import { Trash, Refresh, ArrowLeft } from '@strapi/icons';
+import { Trash, ArrowLeft, Refresh, EmptyDocuments } from '@strapi/icons';
 
 const { useState, useEffect } = React;
-import { useLocation } from 'react-router-dom'
+import { useHistory, useParams } from 'react-router-dom'
 import { useFetchClient } from '@strapi/helper-plugin';
 import { uidMatcher } from '../../../../utils';
+import parseISO from 'date-fns/parseISO';
+import { useIntl } from 'react-intl';
 
-declare type ContentType = {
+declare type ContentTypeItem = {
   uid: string,
   kind: 'collectionType' | 'singleType',
-  active: boolean,
   label: string,
   to: string
 }
 
 const HomePage: React.VoidFunctionComponent = () => {
-  const location = useLocation();
+  const { formatDate } = useIntl();
+  const params = useParams();
+  const history = useHistory();
   const [search, setSearch] = useState('');
-  const { get, del, put } = useFetchClient();
+  const { get, put } = useFetchClient();
 
-  const [softDeletableCollectionTypes, setSoftDeletableCollectionTypes] = useState<ContentType[]>([]);
-  const [softDeletableSingleTypes, setSoftDeletableSingleTypes] = useState<ContentType[]>([]);
-  const [activeContentType, setActiveContentType] = useState<ContentType | null>(null);
+  const [softDeletableCollectionTypes, setSoftDeletableCollectionTypes] = useState<ContentTypeItem[]>([]);
+  const [softDeletableSingleTypes, setSoftDeletableSingleTypes] = useState<ContentTypeItem[]>([]);
   const [mainField, setMainField] = useState<string| null>(null);
   const [entries, setEntries] = useState<any[]>([]);
+  const activeContentType = softDeletableCollectionTypes.concat(softDeletableSingleTypes).filter(contentType => params.uid === contentType.uid)[0]
   useEffect(() => {
     get('/content-manager/init')
       .then(response => {
@@ -66,7 +69,6 @@ const HomePage: React.VoidFunctionComponent = () => {
           .map((contentType, index) => ({
             uid: contentType.uid,
             kind: contentType.kind,
-            active: false,
             label: contentType.info.displayName,
             to: `/plugins/${pluginId}/collectionType/${contentType.uid}`,
           }));
@@ -76,68 +78,80 @@ const HomePage: React.VoidFunctionComponent = () => {
           .map(contentType => ({
             uid: contentType.uid,
             kind: contentType.kind,
-            active: false,
             label: contentType.info.displayName,
             to: `/plugins/${pluginId}/singleType/${contentType.uid}`,
           }));
         setSoftDeletableSingleTypes(singleTypes);
+
+        const firstSoftDeletableContentType = collectionTypes.concat(singleTypes)[0];
+        if (firstSoftDeletableContentType && (!params.type || !params.uid)) {
+          history.push(`/plugins/${pluginId}/${firstSoftDeletableContentType.kind}/${firstSoftDeletableContentType.uid}`);
+        }
       });
-  }, [])
+  }, [params.type, params.uid])
+
+  const [selectedEntries, setSelectedEntries] = useState<number[]>([]);
 
   useEffect(() => {
-    const collectionTypes = softDeletableCollectionTypes.map(contentType => {
-      return {
-        ...contentType,
-        active: (location.pathname as string).match(/collectionType/) !== null && location.pathname.indexOf(contentType.kind + '/' + contentType.uid) > -1
-      }
-    })
-    setSoftDeletableCollectionTypes(collectionTypes)
-    const singleTypes = softDeletableSingleTypes.map(contentType => {
-      return {
-        ...contentType,
-        active: (location.pathname as string).match(/singleType/) !== null && location.pathname.indexOf(contentType.kind + '/' + contentType.uid) > -1
-      }
-    })
-    setSoftDeletableSingleTypes(singleTypes)
-    const activeType = collectionTypes.concat(singleTypes).filter(type => type.active)[0]
-    setActiveContentType(activeType);
+    setSelectedEntries([]);
+    if (!activeContentType) return;
 
-    if (!activeType) return;
-
-    get(`/content-manager/content-types/${activeType.uid}/configuration`)
+    get(`/content-manager/content-types/${activeContentType.uid}/configuration`)
       .then(response => {
         const mainField = response.data.data.contentType.settings.mainField;
         setMainField(mainField);
       });
 
-    get(`/${pluginId}/${activeType.kind}/${activeType.uid}`)
+    get(`/${pluginId}/${activeContentType.kind}/${activeContentType.uid}`)
       .then(response => {
         setEntries(response.data);
       });
-  }, [location.pathname])
+  }, [params.type, params.uid, softDeletableCollectionTypes, softDeletableSingleTypes])
 
-  const [restoreModalOpen, setRestoreModalOpen] = useState<false | number>(false);
-  const [deleteForeverModalOpen, setDeleteForeverModalOpen] = useState<false | number>(false);
+  const [restoreModalOpen, setRestoreModalOpen] = useState<number[]>([]);
+  const [deleteForeverModalOpen, setDeleteForeverModalOpen] = useState<number[]>([]);
 
+  const [restoring, setRestoring] = useState<boolean>(false);
   const confirmRestore = () => {
-    put(`/${pluginId}/${activeContentType?.kind}/${activeContentType?.uid}/${restoreModalOpen}`)
+    if (restoring) return;
+
+    setRestoring(true);
+    put(`/${pluginId}/restore/${activeContentType?.kind}/${activeContentType?.uid}`, {
+      data: {
+        ids: restoreModalOpen,
+      },
+    })
       .then(response => {
-        setRestoreModalOpen(false);
+        setRestoreModalOpen([]);
       })
       .catch(error => {
         console.log(error);
-        setRestoreModalOpen(false);
+        setRestoreModalOpen([]);
+      })
+      .finally(() => {
+        setRestoring(false);
       });
   };
 
+  const [deletingForever, setDeletingForever] = useState<boolean>(false);
   const confirmDeleteForever = () => {
-    del(`/${pluginId}/${activeContentType?.kind}/${activeContentType?.uid}/${deleteForeverModalOpen}`)
+    if (deletingForever) return;
+
+    setDeletingForever(true);
+    put(`/${pluginId}/delete/${activeContentType?.kind}/${activeContentType?.uid}`, {
+      data: {
+        ids: deleteForeverModalOpen,
+      }
+    })
       .then(response => {
-        setDeleteForeverModalOpen(false);
+        setDeleteForeverModalOpen([]);
       })
       .catch(error => {
         console.log(error);
-        setDeleteForeverModalOpen(false);
+        setDeleteForeverModalOpen([]);
+      })
+      .finally(() => {
+        setDeletingForever(false);
       });
   };
 
@@ -148,14 +162,14 @@ const HomePage: React.VoidFunctionComponent = () => {
             <SubNavSections>
               <SubNavSection label="Collection Type" collapsable badgeLabel={softDeletableCollectionTypes.length.toString()}>
                 {
-                  softDeletableCollectionTypes.map((contentType, index) => <SubNavLink to={contentType.to} active={contentType.active} key={index}>
+                  softDeletableCollectionTypes.map((contentType, index) => <SubNavLink to={contentType.to} active={contentType.uid === activeContentType?.uid} key={index}>
                     {contentType.label}
                   </SubNavLink>)
                 }
               </SubNavSection>
               <SubNavSection label="Single Type" collapsable badgeLabel={softDeletableSingleTypes.length.toString()}>
                 {
-                  softDeletableSingleTypes.map((contentType, index) => <SubNavLink to={contentType.to} active={contentType.active} key={index}>
+                  softDeletableSingleTypes.map((contentType, index) => <SubNavLink to={contentType.to} active={contentType.uid === activeContentType?.uid} key={index}>
                     {contentType.label}
                   </SubNavLink>)
                 }
@@ -167,13 +181,19 @@ const HomePage: React.VoidFunctionComponent = () => {
             <Link startIcon={<ArrowLeft />} to={`/plugins/${pluginId}`}>
               Go back
             </Link>
-          } title={softDeletableCollectionTypes.concat(softDeletableSingleTypes).filter(type => type.active)[0]?.label || ''} subtitle={entries.length + " entries found"} as="h2" />}
+          } title={activeContentType?.label || ''} subtitle={entries.length + " entries found"} as="h2" />}
           {activeContentType && <ContentLayout>
             <Table colCount={mainField && mainField != 'id' ? 6 : 5} rowCount={entries.length + 1}>
               <Thead>
                 <Tr>
                   <Th>
-                    <BaseCheckbox aria-label="Select all entries" />
+                    <BaseCheckbox
+                      aria-label="Select all entries"
+                      disabled={!entries.length}
+                      checked={entries.length && selectedEntries.length === entries.length}
+                      indeterminate={selectedEntries.length && selectedEntries.length !== entries.length}
+                      onChange={() => selectedEntries.length === entries.length ? setSelectedEntries([]) : setSelectedEntries(entries.map(entry => entry.id))}
+                    />
                   </Th>
                   <Th>
                     <Typography variant="sigma">ID</Typography>
@@ -188,24 +208,31 @@ const HomePage: React.VoidFunctionComponent = () => {
                     <Typography variant="sigma">{mainField}</Typography>
                   </Th>}
                   <Th>
-                    <VisuallyHidden>Actions</VisuallyHidden>
+                    {selectedEntries.length && <Flex justifyContent="end" gap="1" width="100%">
+                      <IconButton onClick={() => {setDeleteForeverModalOpen([]); setRestoreModalOpen(selectedEntries)}} label="Restore" icon={<Refresh />} />
+                      <IconButton onClick={() => {setRestoreModalOpen([]); setDeleteForeverModalOpen(selectedEntries)}} label="Delete forever" icon={<Trash />} />
+                    </Flex> || <VisuallyHidden>Actions</VisuallyHidden>}
                   </Th>
                 </Tr>
               </Thead>
               <Tbody>
-                {
+                {entries.length &&
                   entries.map(entry => <Tr key={entry.id}>
                     <Td>
-                      <BaseCheckbox aria-label={`Select ${entry.name}`} />
+                      <BaseCheckbox
+                        aria-label={`Select ${entry.name}`}
+                        checked={selectedEntries.includes(entry.id)}
+                        onChange={() => selectedEntries.includes(entry.id) ? setSelectedEntries(selectedEntries.filter(item => item !== entry.id)) : setSelectedEntries([...selectedEntries, entry.id])}
+                      />
                     </Td>
                     <Td>
                       <Typography textColor="neutral800">{entry.id}</Typography>
                     </Td>
                     <Td>
-                      <Typography textColor="neutral800">{entry.softDeletedAt}</Typography>
+                      <Typography textColor="neutral800">{formatDate(parseISO(entry.softDeletedAt), { dateStyle: 'full', timeStyle: 'short' })}</Typography>
                     </Td>
                     <Td>
-                      <Typography textColor="neutral800">{entry.softDeletedBy}</Typography>
+                      <Typography textColor="neutral800">{entry.softDeletedBy[0]?.username || entry.softDeletedBy[0]?.email || '-'}</Typography>
                     </Td>
                     { mainField && mainField != 'id' &&
                     <Td>
@@ -213,18 +240,25 @@ const HomePage: React.VoidFunctionComponent = () => {
                     </Td>}
                     <Td>
                       <Flex justifyContent="end" gap="1">
-                        <IconButton onClick={() => {setDeleteForeverModalOpen(false); setRestoreModalOpen(entry.id)}} label="Restore" icon={<Refresh />} />
-                        <IconButton onClick={() => {setRestoreModalOpen(false); setDeleteForeverModalOpen(entry.id)}} label="Delete forever" icon={<Trash />} />
+                        <IconButton onClick={() => {setDeleteForeverModalOpen([]); setRestoreModalOpen([entry.id])}} label="Restore" icon={<Refresh />} />
+                        <IconButton onClick={() => {setRestoreModalOpen([]); setDeleteForeverModalOpen([entry.id])}} label="Delete forever" icon={<Trash />} />
                       </Flex>
                     </Td>
-                  </Tr>)
+                  </Tr>) || <Tr>
+                    <Td colSpan={5}>
+                      <Flex direction="column" gap="6" padding="4rem">
+                        <EmptyDocuments width="10rem" height="5.5rem" />
+                        <Typography variant="delta" textColor="neutral600">No entries found</Typography>
+                      </Flex>
+                    </Td>
+                  </Tr>
                 }
               </Tbody>
             </Table>
           </ContentLayout>}
         </>
       </Layout>
-      {restoreModalOpen && <ModalLayout onClose={() => setRestoreModalOpen(false)} labelledBy="title">
+      {restoreModalOpen.length && <ModalLayout onClose={() => setRestoreModalOpen([])} labelledBy="title">
         <ModalHeader>
           <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
             Confirmation
@@ -232,16 +266,16 @@ const HomePage: React.VoidFunctionComponent = () => {
         </ModalHeader>
         <ModalBody>
           <Typography textColor="neutral800">
-            Are you sure you want to restore this entry?
+            Are you sure you want to restore {restoreModalOpen.length > 1 ? 'these entries' : 'this entry'}?
           </Typography>
         </ModalBody>
-        <ModalFooter startActions={<Button onClick={() => setRestoreModalOpen(false)} variant="tertiary">
+        <ModalFooter startActions={<Button onClick={() => setRestoreModalOpen([])} variant="tertiary" disabled={restoring}>
             Cancel
           </Button>} endActions={<>
-            <Button onClick={confirmRestore}>Yes</Button>
+            <Button onClick={confirmRestore} disabled={restoring}>Yes</Button>
           </>} />
-      </ModalLayout>}
-      {deleteForeverModalOpen && <ModalLayout onClose={() => setDeleteForeverModalOpen(false)} labelledBy="title">
+      </ModalLayout> || <></>}
+      {deleteForeverModalOpen.length && <ModalLayout onClose={() => setDeleteForeverModalOpen([])} labelledBy="title">
         <ModalHeader>
           <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
             Confirmation
@@ -249,15 +283,15 @@ const HomePage: React.VoidFunctionComponent = () => {
         </ModalHeader>
         <ModalBody>
           <Typography textColor="neutral800">
-            Are you sure you want to delete this entry forever?
+            Are you sure you want to delete {deleteForeverModalOpen.length > 1 ? 'these entries' : 'this entry'} forever?
           </Typography>
         </ModalBody>
-        <ModalFooter startActions={<Button onClick={() => setDeleteForeverModalOpen(false)} variant="tertiary">
+        <ModalFooter startActions={<Button onClick={() => setDeleteForeverModalOpen([])} variant="tertiary" disabled={deletingForever}>
             Cancel
           </Button>} endActions={<>
-            <Button onClick={confirmDeleteForever}>Yes</Button>
+            <Button onClick={confirmDeleteForever} disabled={deletingForever}>Yes</Button>
           </>} />
-      </ModalLayout>}
+      </ModalLayout> || <></>}
     </Box>
   );
 };
