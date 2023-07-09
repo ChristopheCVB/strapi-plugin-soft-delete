@@ -94,7 +94,7 @@ const HomePage: React.VoidFunctionComponent = () => {
               action: 'plugin::soft-delete.delete',
             },
             ...collectionTypes.concat(singleTypes).map(contentType => ({
-              action: 'plugin::content-manager.explorer.delete',
+              action: 'plugin::content-manager.explorer.read',
               subject: contentType.uid,
             })),
           ],

@@ -4,11 +4,10 @@ export default ({ strapi }: { strapi: any }) => {
   for (
     let object of []
     .concat(Object.entries(strapi.contentTypes))
-    // .concat(Object.entries(strapi.components)) // TODO: Deleting a compoment doesn't use the entityService
+    // .concat(Object.entries(strapi.components)) // TODO: Deleting a compoment doesn't use the entityService.delete or entityService.deleteMany
   ) {
-    const [uid, type] = object as [uid: string, type: any];
+    const [uid, contentType] = object as [uid: string, type: any];
     if (uidMatcher(uid)) {
-      console.log({uid, type});
       const softDeletedAt = {
         type: "datetime",
         configurable: false,
@@ -16,8 +15,9 @@ export default ({ strapi }: { strapi: any }) => {
         visible: false,
         private: true,
       };
-      type.attributes.softDeletedAt = softDeletedAt;
-      type.__schema__.attributes.softDeletedAt = softDeletedAt;
+      contentType.attributes.softDeletedAt = softDeletedAt;
+      contentType.__schema__.attributes.softDeletedAt = softDeletedAt;
+
       const softDeletedBy = {
         type: "relation",
         relation: "oneToMany",
@@ -27,8 +27,8 @@ export default ({ strapi }: { strapi: any }) => {
         visible: false,
         private: true,
       };
-      type.attributes.softDeletedBy = softDeletedBy;
-      type.__schema__.attributes.softDeletedBy = softDeletedBy;
+      contentType.attributes.softDeletedBy = softDeletedBy;
+      contentType.__schema__.attributes.softDeletedBy = softDeletedBy;
     }
   }
 };
