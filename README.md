@@ -42,13 +42,13 @@ To install this plugin, you need to add an NPM dependency to your Strapi applica
 
 ```sh
 # Using Yarn
-yarn add @strapi/plugin-soft-delete
+yarn add strapi-plugin-soft-delete
 
 # Or using PNPM
-pnpm add @strapi/plugin-soft-delete
+pnpm add strapi-plugin-soft-delete
 
 # Or using NPM
-npm install @strapi/plugin-soft-delete
+npm install strapi-plugin-soft-delete
 ```
 
 Then, you'll need to build your admin panel:
