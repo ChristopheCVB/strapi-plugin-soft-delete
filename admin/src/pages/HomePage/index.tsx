@@ -43,6 +43,8 @@ import { uidMatcher } from '../../../../utils';
 import parseISO from 'date-fns/parseISO';
 import { useIntl } from 'react-intl';
 
+import { useRBACProvider } from '@strapi/helper-plugin';
+
 declare type ContentTypeItem = {
   uid: string,
   kind: 'collectionType' | 'singleType',
@@ -55,20 +57,24 @@ const HomePage: React.VoidFunctionComponent = () => {
   const params = useParams();
   const history = useHistory();
   const [search, setSearch] = useState('');
-  const { post, get, put } = useFetchClient();
+  const { get, put } = useFetchClient();
+  const { allPermissions } = useRBACProvider();
 
   const [softDeletableCollectionTypes, setSoftDeletableCollectionTypes] = useState<ContentTypeItem[]>([]);
   const [softDeletableSingleTypes, setSoftDeletableSingleTypes] = useState<ContentTypeItem[]>([]);
   const [mainField, setMainField] = useState<string| null>(null);
   const [entries, setEntries] = useState<any[]>([]);
+
   const activeContentType = softDeletableCollectionTypes.concat(softDeletableSingleTypes).filter(contentType => params.uid === contentType.uid)[0]
-  const [canRestore, setCanRestore] = useState<boolean>(false);
-  const [canDeleteForever, setCanDeleteForever] = useState<boolean>(false);
+  const canRestore = allPermissions.some(permission => permission.action === 'plugin::soft-delete.explorer.restore' && permission.subject === activeContentType?.uid);
+  const canDeletePermanantly = allPermissions.some(permission => permission.action === 'plugin::soft-delete.explorer.delete-permanently' && permission.subject === activeContentType?.uid)
+
   useEffect(() => {
     get('/content-manager/init')
       .then(response => {
-        let collectionTypes = (response.data.data.contentTypes as any[])
+        const collectionTypes = (response.data.data.contentTypes as any[])
           .filter(contentType => contentType.isDisplayed && contentType.kind === 'collectionType' && uidMatcher(contentType.uid))
+          .filter(contentType => allPermissions.some(permission => permission.action === `plugin::soft-delete.explorer.read` && permission.subject === contentType.uid))
           .map(contentType => ({
             uid: contentType.uid,
             kind: contentType.kind,
@@ -76,8 +82,9 @@ const HomePage: React.VoidFunctionComponent = () => {
             to: `/plugins/${pluginId}/collectionType/${contentType.uid}`,
           }));
 
-        let singleTypes = (response.data.data.contentTypes as any[])
+        const singleTypes = (response.data.data.contentTypes as any[])
           .filter(contentType => contentType.isDisplayed && contentType.kind === 'singleType' && uidMatcher(contentType.uid))
+          .filter(contentType => allPermissions.some(permission => permission.action === `plugin::soft-delete.explorer.read` && permission.subject === contentType.uid))
           .map(contentType => ({
             uid: contentType.uid,
             kind: contentType.kind,
@@ -85,39 +92,13 @@ const HomePage: React.VoidFunctionComponent = () => {
             to: `/plugins/${pluginId}/singleType/${contentType.uid}`,
           }));
 
-        post('/admin/permissions/check', {
-          permissions: [
-            {
-              action: 'plugin::soft-delete.restore',
-            },
-            {
-              action: 'plugin::soft-delete.delete',
-            },
-            ...collectionTypes.concat(singleTypes).map(contentType => ({
-              action: 'plugin::content-manager.explorer.read',
-              subject: contentType.uid,
-            })),
-          ],
-        })
-          .then(response => {
-            setCanRestore(response.data.data[0]);
-            setCanDeleteForever(response.data.data[1]);
+        setSoftDeletableCollectionTypes(collectionTypes);
+        setSoftDeletableSingleTypes(singleTypes);
 
-
-            const collectionTypesLength = collectionTypes.length;
-            collectionTypes = collectionTypes
-              .filter((_, index) => response.data.data[2 + index]);
-            setSoftDeletableCollectionTypes(collectionTypes);
-
-            singleTypes = singleTypes
-              .filter((_, index) => response.data.data[2 + collectionTypesLength + index])
-            setSoftDeletableSingleTypes(singleTypes);
-
-            const firstSoftDeletableContentType = collectionTypes.concat(singleTypes)[0];
-            if (firstSoftDeletableContentType && (!params.type || !params.uid)) {
-              history.push(`/plugins/${pluginId}/${firstSoftDeletableContentType.kind}/${firstSoftDeletableContentType.uid}`);
-            }
-          });
+        const firstSoftDeletableContentType = collectionTypes.concat(singleTypes)[0];
+        if (firstSoftDeletableContentType && (!params.type || !params.uid)) {
+          history.push(`/plugins/${pluginId}/${firstSoftDeletableContentType.kind}/${firstSoftDeletableContentType.uid}`);
+        }
       });
   }, [params.type, params.uid])
 
@@ -129,8 +110,7 @@ const HomePage: React.VoidFunctionComponent = () => {
 
     get(`/content-manager/content-types/${activeContentType.uid}/configuration`)
       .then(response => {
-        const mainField = response.data.data.contentType.settings.mainField;
-        setMainField(mainField);
+        setMainField(response.data.data.contentType.settings.mainField);
       });
 
     get(`/${pluginId}/${activeContentType.kind}/${activeContentType.uid}`)
@@ -220,7 +200,7 @@ const HomePage: React.VoidFunctionComponent = () => {
                   <Th>
                     <BaseCheckbox
                       aria-label="Select all entries"
-                      disabled={!canRestore && !canDeleteForever || !entries.length}
+                      disabled={!canRestore && !canDeletePermanantly || !entries.length}
                       checked={entries.length && selectedEntries.length === entries.length}
                       indeterminate={selectedEntries.length && selectedEntries.length !== entries.length}
                       onChange={() => selectedEntries.length === entries.length ? setSelectedEntries([]) : setSelectedEntries(entries.map(entry => entry.id))}
@@ -241,7 +221,7 @@ const HomePage: React.VoidFunctionComponent = () => {
                   <Th>
                     {selectedEntries.length && <Flex justifyContent="end" gap="1" width="100%">
                       {canRestore && <IconButton onClick={() => {setDeleteForeverModalOpen([]); setRestoreModalOpen(selectedEntries)}} label="Restore" icon={<Refresh />} />}
-                      {canDeleteForever && <IconButton onClick={() => {setRestoreModalOpen([]); setDeleteForeverModalOpen(selectedEntries)}} label="Delete forever" icon={<Trash />} />}
+                      {canDeletePermanantly && <IconButton onClick={() => {setRestoreModalOpen([]); setDeleteForeverModalOpen(selectedEntries)}} label="Delete forever" icon={<Trash />} />}
                     </Flex> || <VisuallyHidden>Actions</VisuallyHidden>}
                   </Th>
                 </Tr>
@@ -252,7 +232,7 @@ const HomePage: React.VoidFunctionComponent = () => {
                     <Td>
                       <BaseCheckbox
                         aria-label={`Select ${entry.name}`}
-                        disabled={!canRestore && !canDeleteForever}
+                        disabled={!canRestore && !canDeletePermanantly}
                         checked={selectedEntries.includes(entry.id)}
                         onChange={() => selectedEntries.includes(entry.id) ? setSelectedEntries(selectedEntries.filter(item => item !== entry.id)) : setSelectedEntries([...selectedEntries, entry.id])}
                       />
@@ -273,7 +253,7 @@ const HomePage: React.VoidFunctionComponent = () => {
                     <Td>
                       <Flex justifyContent="end" gap="1">
                         {canRestore && <IconButton onClick={() => {setDeleteForeverModalOpen([]); setRestoreModalOpen([entry.id])}} label="Restore" icon={<Refresh />} />}
-                        {canDeleteForever && <IconButton onClick={() => {setRestoreModalOpen([]); setDeleteForeverModalOpen([entry.id])}} label="Delete forever" icon={<Trash />} />}
+                        {canDeletePermanantly && <IconButton onClick={() => {setRestoreModalOpen([]); setDeleteForeverModalOpen([entry.id])}} label="Delete forever" icon={<Trash />} />}
                       </Flex>
                     </Td>
                   </Tr>) || <Tr>

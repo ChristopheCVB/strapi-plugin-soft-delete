@@ -20,7 +20,7 @@ export default [
     path: '/delete/:kind/:uid/:id',
     handler: 'controller.delete',
     config: {
-      policies: ['canDelete'],
+      policies: ['canDeletePermanently'],
     },
   },
   {
@@ -36,7 +36,7 @@ export default [
     path: '/delete/:kind/:uid',
     handler: 'controller.deleteMany',
     config: {
-      policies: ['canDelete'],
+      policies: ['canDeletePermanently'],
     },
   },
   {

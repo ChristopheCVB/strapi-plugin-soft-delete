@@ -27,27 +27,43 @@ const sdWrapParams = async (defaultService: any, opts: any, ctx: { uid: string, 
 
 export default async ({ strapi }: { strapi: any }) => {
   // Setup Permissions
-  const actions = [
-    {
-      uid: 'read',
-      displayName: 'Read',
-      pluginName: pluginId,
-      section: 'plugins',
-    },
-    {
-      uid: 'restore',
-      displayName: 'Restore',
-      pluginName: pluginId,
-      section: 'plugins',
-    },
-    {
-      uid: 'delete',
-      displayName: 'Delete',
-      pluginName: pluginId,
-      section: 'plugins',
-    }
-  ];
-  await strapi.admin.services.permission.actionProvider.registerMany(actions);
+  strapi.admin.services.permission.actionProvider.get('plugin::content-manager.explorer.delete').displayName = 'Soft Delete';
+
+  const contentTypeUids = Object.keys(strapi.contentTypes).filter(uidMatcher);
+  strapi.admin.services.permission.actionProvider.register({
+    uid: 'read',
+    displayName: 'Read',
+    pluginName: pluginId,
+    section: 'plugins',
+  })
+
+  strapi.admin.services.permission.actionProvider.register({
+    uid: 'explorer.read',
+    options: { applyToProperties: [ 'locales' ] },
+    section: 'contentTypes',
+    displayName: 'Deleted Read',
+    pluginName: pluginId,
+    subjects: contentTypeUids,
+  });
+
+  strapi.admin.services.permission.actionProvider.register({
+    uid: 'explorer.restore',
+    options: { applyToProperties: [ 'locales' ] },
+    section: 'contentTypes',
+    displayName: 'Deleted Restore',
+    pluginName: pluginId,
+    subjects: contentTypeUids,
+  });
+
+  strapi.admin.services.permission.actionProvider.register({
+    uid: 'explorer.delete-permanently',
+    options: { applyToProperties: [ 'locales' ] },
+    section: 'contentTypes',
+    displayName: 'Delete Permanently',
+    pluginName: pluginId,
+    subjects: contentTypeUids,
+  });
+
 
   // Decorate Entity Services
   strapi.entityService.decorate((defaultService) => ({

@@ -1,9 +1,9 @@
 import canRead from './canRead';
 import canRestore from './canRestore';
-import canDelete from './canDelete';
+import canDeletePermanently from './canDeletePermanently';
 
 export default {
   canRead,
   canRestore,
-  canDelete,
+  canDeletePermanently,
 };
