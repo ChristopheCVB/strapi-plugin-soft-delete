@@ -34,7 +34,7 @@ import {
   ModalFooter,
   Button,
 } from '@strapi/design-system';
-import { Trash, ArrowLeft, Refresh, EmptyDocuments } from '@strapi/icons';
+import { Trash, ArrowLeft, Refresh, EmptyDocuments, Loader } from '@strapi/icons';
 
 const { useState, useEffect } = React;
 import { useHistory, useParams } from 'react-router-dom'
@@ -67,7 +67,8 @@ const HomePage: React.VoidFunctionComponent = () => {
 
   const activeContentType = softDeletableCollectionTypes.concat(softDeletableSingleTypes).filter(contentType => params.uid === contentType.uid)[0]
   const canRestore = allPermissions.some(permission => permission.action === 'plugin::soft-delete.explorer.restore' && permission.subject === activeContentType?.uid);
-  const canDeletePermanantly = allPermissions.some(permission => permission.action === 'plugin::soft-delete.explorer.delete-permanently' && permission.subject === activeContentType?.uid)
+  const canDeletePermanantly = allPermissions.some(permission => permission.action === 'plugin::soft-delete.explorer.delete-permanently' && permission.subject === activeContentType?.uid);
+  const canReadMainField = allPermissions.some(permission => permission.action === 'plugin::content-manager.explorer.read' && permission.subject === activeContentType?.uid && permission.properties.fields.includes(mainField));
 
   useEffect(() => {
     get('/content-manager/init')
@@ -102,10 +103,11 @@ const HomePage: React.VoidFunctionComponent = () => {
       });
   }, [params.type, params.uid])
 
-  const [selectedEntries, setSelectedEntries] = useState<number[]>([]);
+  const [selectedEntriesIds, setSelectedEntriesIds] = useState<number[]>([]);
 
   useEffect(() => {
-    setSelectedEntries([]);
+    setSelectedEntriesIds([]);
+    setEntries([]);
     if (!activeContentType) return;
 
     get(`/content-manager/content-types/${activeContentType.uid}/configuration`)
@@ -119,50 +121,52 @@ const HomePage: React.VoidFunctionComponent = () => {
       });
   }, [params.type, params.uid, softDeletableCollectionTypes, softDeletableSingleTypes])
 
-  const [restoreModalOpen, setRestoreModalOpen] = useState<number[]>([]);
-  const [deleteForeverModalOpen, setDeleteForeverModalOpen] = useState<number[]>([]);
+  const [restoreModalEntriesIds, setRestoreModalEntriesIds] = useState<number[]>([]);
+  const [deletePermanentlyModalEntriesIds, setDeletePermanentlyModalEntriesIds] = useState<number[]>([]);
 
-  const [restoring, setRestoring] = useState<boolean>(false);
+  const [isRestoring, setIsRestoring] = useState<boolean>(false);
   const confirmRestore = () => {
-    if (restoring) return;
+    if (isRestoring) return;
 
-    setRestoring(true);
+    setIsRestoring(true);
     put(`/${pluginId}/restore/${activeContentType?.kind}/${activeContentType?.uid}`, {
       data: {
-        ids: restoreModalOpen,
+        ids: restoreModalEntriesIds,
       },
     })
-      .then(response => {
-        setRestoreModalOpen([]);
+      .then(() => {
+        setEntries(entries.filter(entry => !restoreModalEntriesIds.includes(entry.id)));
+        setSelectedEntriesIds([]);
       })
       .catch(error => {
-        console.log(error);
-        setRestoreModalOpen([]);
+        console.log(error); // TODO: Show error
       })
       .finally(() => {
-        setRestoring(false);
+        setRestoreModalEntriesIds([]);
+        setIsRestoring(false);
       });
   };
 
-  const [deletingForever, setDeletingForever] = useState<boolean>(false);
+  const [isDeletingPermanently, setIsDeletingPermanently] = useState<boolean>(false);
   const confirmDeleteForever = () => {
-    if (deletingForever) return;
+    if (isDeletingPermanently) return;
 
-    setDeletingForever(true);
+    setIsDeletingPermanently(true);
     put(`/${pluginId}/delete/${activeContentType?.kind}/${activeContentType?.uid}`, {
       data: {
-        ids: deleteForeverModalOpen,
+        ids: deletePermanentlyModalEntriesIds,
       }
     })
-      .then(response => {
-        setDeleteForeverModalOpen([]);
+      .then(() => {
+        setEntries(entries.filter(entry => !deletePermanentlyModalEntriesIds.includes(entry.id)));
+        setSelectedEntriesIds([]);
       })
       .catch(error => {
-        console.log(error);
-        setDeleteForeverModalOpen([]);
+        console.log(error); // TODO: Show error
       })
       .finally(() => {
-        setDeletingForever(false);
+        setDeletePermanentlyModalEntriesIds([]);
+        setIsDeletingPermanently(false);
       });
   };
 
@@ -194,16 +198,16 @@ const HomePage: React.VoidFunctionComponent = () => {
             </Link>
           } title={activeContentType?.label || ''} subtitle={entries.length + " entries found"} as="h2" />}
           {activeContentType && <ContentLayout>
-            <Table colCount={mainField && mainField != 'id' ? 6 : 5} rowCount={entries.length + 1}>
+            <Table colCount={mainField && mainField != 'id' && canReadMainField ? 6 : 5} rowCount={entries.length + 1}>
               <Thead>
                 <Tr>
                   <Th>
                     <BaseCheckbox
                       aria-label="Select all entries"
                       disabled={!canRestore && !canDeletePermanantly || !entries.length}
-                      checked={entries.length && selectedEntries.length === entries.length}
-                      indeterminate={selectedEntries.length && selectedEntries.length !== entries.length}
-                      onChange={() => selectedEntries.length === entries.length ? setSelectedEntries([]) : setSelectedEntries(entries.map(entry => entry.id))}
+                      checked={entries.length && selectedEntriesIds.length === entries.length}
+                      indeterminate={selectedEntriesIds.length && selectedEntriesIds.length !== entries.length}
+                      onChange={() => selectedEntriesIds.length === entries.length ? setSelectedEntriesIds([]) : setSelectedEntriesIds(entries.map(entry => entry.id))}
                     />
                   </Th>
                   <Th>
@@ -215,13 +219,13 @@ const HomePage: React.VoidFunctionComponent = () => {
                   <Th>
                     <Typography variant="sigma">Soft Deleted By</Typography>
                   </Th>
-                  { mainField && mainField != 'id' &&<Th>
+                  {mainField && mainField != 'id' && canReadMainField && <Th>
                     <Typography variant="sigma">{mainField}</Typography>
                   </Th>}
                   <Th>
-                    {selectedEntries.length && <Flex justifyContent="end" gap="1" width="100%">
-                      {canRestore && <IconButton onClick={() => {setDeleteForeverModalOpen([]); setRestoreModalOpen(selectedEntries)}} label="Restore" icon={<Refresh />} />}
-                      {canDeletePermanantly && <IconButton onClick={() => {setRestoreModalOpen([]); setDeleteForeverModalOpen(selectedEntries)}} label="Delete forever" icon={<Trash />} />}
+                    {selectedEntriesIds.length && <Flex justifyContent="end" gap="1" width="100%">
+                      {canRestore && <IconButton onClick={() => {setDeletePermanentlyModalEntriesIds([]); setRestoreModalEntriesIds(selectedEntriesIds)}} label="Restore" icon={<Refresh />} />}
+                      {canDeletePermanantly && <IconButton onClick={() => {setRestoreModalEntriesIds([]); setDeletePermanentlyModalEntriesIds(selectedEntriesIds)}} label="Delete forever" icon={<Trash />} />}
                     </Flex> || <VisuallyHidden>Actions</VisuallyHidden>}
                   </Th>
                 </Tr>
@@ -233,8 +237,8 @@ const HomePage: React.VoidFunctionComponent = () => {
                       <BaseCheckbox
                         aria-label={`Select ${entry.name}`}
                         disabled={!canRestore && !canDeletePermanantly}
-                        checked={selectedEntries.includes(entry.id)}
-                        onChange={() => selectedEntries.includes(entry.id) ? setSelectedEntries(selectedEntries.filter(item => item !== entry.id)) : setSelectedEntries([...selectedEntries, entry.id])}
+                        checked={selectedEntriesIds.includes(entry.id)}
+                        onChange={() => selectedEntriesIds.includes(entry.id) ? setSelectedEntriesIds(selectedEntriesIds.filter(item => item !== entry.id)) : setSelectedEntriesIds([...selectedEntriesIds, entry.id])}
                       />
                     </Td>
                     <Td>
@@ -246,14 +250,14 @@ const HomePage: React.VoidFunctionComponent = () => {
                     <Td>
                       <Typography textColor="neutral800">{entry.softDeletedBy[0]?.username || entry.softDeletedBy[0]?.email || '-'}</Typography>
                     </Td>
-                    { mainField && mainField != 'id' &&
+                    { mainField && mainField != 'id' && canReadMainField &&
                     <Td>
                       <Typography textColor="neutral800">{entry[mainField]}</Typography>
                     </Td>}
                     <Td>
                       <Flex justifyContent="end" gap="1">
-                        {canRestore && <IconButton onClick={() => {setDeleteForeverModalOpen([]); setRestoreModalOpen([entry.id])}} label="Restore" icon={<Refresh />} />}
-                        {canDeletePermanantly && <IconButton onClick={() => {setRestoreModalOpen([]); setDeleteForeverModalOpen([entry.id])}} label="Delete forever" icon={<Trash />} />}
+                        {canRestore && <IconButton onClick={() => {setDeletePermanentlyModalEntriesIds([]); setRestoreModalEntriesIds([entry.id])}} label="Restore" icon={<Refresh />} />}
+                        {canDeletePermanantly && <IconButton onClick={() => {setRestoreModalEntriesIds([]); setDeletePermanentlyModalEntriesIds([entry.id])}} label="Delete forever" icon={<Trash />} />}
                       </Flex>
                     </Td>
                   </Tr>) || <Tr>
@@ -270,38 +274,48 @@ const HomePage: React.VoidFunctionComponent = () => {
           </ContentLayout>}
         </>
       </Layout>
-      {restoreModalOpen.length && <ModalLayout onClose={() => setRestoreModalOpen([])} labelledBy="title">
+      {restoreModalEntriesIds.length && <ModalLayout onClose={!isRestoring ? () => setRestoreModalEntriesIds([]) : null} labelledBy="title">
         <ModalHeader>
           <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
-            Confirmation
+            Confirm Restore
           </Typography>
         </ModalHeader>
         <ModalBody>
+          {isRestoring &&
+          <Loader width="10rem" height="10rem" /> &&
           <Typography textColor="neutral800">
-            Are you sure you want to restore {restoreModalOpen.length > 1 ? 'these entries' : 'this entry'}?
-          </Typography>
+            Restoring {restoreModalEntriesIds.length > 1 ? `${restoreModalEntriesIds.length} entries` : 'one entry'}?
+          </Typography> ||
+          <Typography textColor="neutral800">
+            Are you sure you want to restore {restoreModalEntriesIds.length > 1 ? `${restoreModalEntriesIds.length} entries` : 'one entry'}?
+          </Typography>}
         </ModalBody>
-        <ModalFooter startActions={<Button onClick={() => setRestoreModalOpen([])} variant="tertiary" disabled={restoring}>
+        <ModalFooter startActions={<Button onClick={() => setRestoreModalEntriesIds([])} variant="tertiary" disabled={isRestoring}>
             Cancel
           </Button>} endActions={<>
-            <Button onClick={confirmRestore} disabled={restoring}>Yes</Button>
+            <Button onClick={confirmRestore} disabled={isRestoring}>Yes</Button>
           </>} />
       </ModalLayout> || <></>}
-      {deleteForeverModalOpen.length && <ModalLayout onClose={() => setDeleteForeverModalOpen([])} labelledBy="title">
+      {deletePermanentlyModalEntriesIds.length && <ModalLayout onClose={!isDeletingPermanently ? () => setDeletePermanentlyModalEntriesIds([]) : null} labelledBy="title">
         <ModalHeader>
           <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
-            Confirmation
+            Confirm Delete Permanently
           </Typography>
         </ModalHeader>
         <ModalBody>
+          {isDeletingPermanently &&
+          <Loader width="10rem" height="10rem" /> &&
           <Typography textColor="neutral800">
-            Are you sure you want to delete {deleteForeverModalOpen.length > 1 ? 'these entries' : 'this entry'} forever?
-          </Typography>
+            Restoring {deletePermanentlyModalEntriesIds.length > 1 ? `${deletePermanentlyModalEntriesIds.length} entries` : 'one entry'}?
+          </Typography> ||
+          <Typography textColor="neutral800">
+            Are you sure you want to permanently delete {deletePermanentlyModalEntriesIds.length > 1 ? `${deletePermanentlyModalEntriesIds.length} entries` : 'one entry'}?
+          </Typography>}
         </ModalBody>
-        <ModalFooter startActions={<Button onClick={() => setDeleteForeverModalOpen([])} variant="tertiary" disabled={deletingForever}>
+        <ModalFooter startActions={<Button onClick={() => setDeletePermanentlyModalEntriesIds([])} variant="tertiary" disabled={isDeletingPermanently}>
             Cancel
           </Button>} endActions={<>
-            <Button onClick={confirmDeleteForever} disabled={deletingForever}>Yes</Button>
+            <Button onClick={confirmDeleteForever} disabled={isDeletingPermanently}>Yes</Button>
           </>} />
       </ModalLayout> || <></>}
     </Box>
