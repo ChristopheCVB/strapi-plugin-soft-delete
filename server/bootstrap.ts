@@ -82,7 +82,8 @@ export default async ({ strapi }: { strapi: Strapi & { admin: any } }) => {
         data: {
           ...wrappedParams.data,
           softDeletedAt: Date.now(),
-          softDeletedBy: [ctx.state.user.id], // TODO: Check if this is an admin user
+          softDeletedBy: [ctx.state.user.id], // FIXME: softDeletedById
+          // softDeletedByType: ctx.state.user.type, // FIXME: softDeletedByType
         },
       });
     },
@@ -102,7 +103,8 @@ export default async ({ strapi }: { strapi: Strapi & { admin: any } }) => {
         const deletedEntity = await defaultService.update(uid, entityToDelete.id, {
           data: {
             softDeletedAt: Date.now(),
-            softDeletedBy: [ctx.state.user.id], // TODO: Check if this is an admin user
+            softDeletedBy: [ctx.state.user.id], // FIXME: softDeletedById
+            // softDeletedByType: ctx.state.user.type, // FIXME: softDeletedByType
           },
         })
         if (deletedEntity) {

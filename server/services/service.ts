@@ -39,8 +39,8 @@ export default ({ strapi }: { strapi: Strapi }) => ({
   },
 
   restore(ctx) {
-    // FIXME: Handle ctx.params.kind === singleType
-    // FIXME: Handle publicationState
+    // TODO: Handle ctx.params.kind === singleType
+    // TODO: Handle publicationState
     return strapi.query(ctx.params.uid).update({
       select: '*',
       where: {
@@ -63,8 +63,8 @@ export default ({ strapi }: { strapi: Strapi }) => ({
   },
 
   restoreMany(ctx) {
-    // FIXME: Handle ctx.params.kind === singleType
-    // FIXME: Handle publicationState
+    // TODO: Handle ctx.params.kind === singleType
+    // TODO: Handle publicationState
     return strapi.query(ctx.params.uid).updateMany({
       select: '*',
       where: {

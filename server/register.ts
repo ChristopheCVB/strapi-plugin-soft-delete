@@ -18,7 +18,7 @@ export default ({ strapi }: { strapi: Strapi }) => {
       contentType.attributes.softDeletedAt = softDeletedAt;
       contentType.__schema__.attributes.softDeletedAt = softDeletedAt;
 
-      const softDeletedBy = {
+      const softDeletedBy = { // FIXME: softDeletedById
         type: "relation",
         relation: "oneToMany",
         target: "admin::user",
@@ -29,6 +29,8 @@ export default ({ strapi }: { strapi: Strapi }) => {
       };
       contentType.attributes.softDeletedBy = softDeletedBy;
       contentType.__schema__.attributes.softDeletedBy = softDeletedBy;
+
+      // FIXME: softDeletedByType
     }
   }
 };
