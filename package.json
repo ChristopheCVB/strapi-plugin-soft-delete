@@ -12,6 +12,14 @@
     "type": "git",
     "url": "https://github.com/ChristopheCVB/strapi-plugin-soft-delete"
   },
+  "keywords": [
+    "strapi",
+    "strapi-plugin",
+    "soft-delete",
+    "soft delete",
+    "soft",
+    "delete"
+  ],
   "dependencies": {
     "@strapi/design-system": "^1.8.1",
     "@strapi/icons": "^1.8.1",
