@@ -1,12 +1,12 @@
+import { Strapi } from '@strapi/strapi';
 import { uidMatcher } from "../utils";
 
-export default ({ strapi }: { strapi: any }) => {
+export default ({ strapi }: { strapi: Strapi }) => {
   for (
-    let object of []
-    .concat(Object.entries(strapi.contentTypes))
+    let contentTypeRecord of Object.entries(strapi.contentTypes)
     // .concat(Object.entries(strapi.components)) // TODO: Deleting a compoment doesn't use the entityService.delete or entityService.deleteMany
   ) {
-    const [uid, contentType] = object as [uid: string, type: any];
+    const [uid, contentType] = contentTypeRecord as [uid: string, type: any];
     if (uidMatcher(uid)) {
       const softDeletedAt = {
         type: "datetime",

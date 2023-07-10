@@ -7,16 +7,16 @@
 
 import React from 'react';
 import { Switch, Route } from 'react-router-dom';
-import { NotFound } from '@strapi/helper-plugin';
+import { AnErrorOccurred } from '@strapi/helper-plugin';
 import { pluginId } from '../../../../utils/plugin';
 import HomePage from '../HomePage';
 
-const App: React.VoidFunctionComponent = () => {
+const App = () => {
   return (
     <div>
       <Switch>
         <Route path={`/plugins/${pluginId}/:kind?/:uid?`} component={HomePage} exact />
-        <Route component={NotFound} />
+        <Route component={AnErrorOccurred} />
       </Switch>
     </div>
   );

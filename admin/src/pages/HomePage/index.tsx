@@ -45,6 +45,26 @@ import { useIntl } from 'react-intl';
 
 import { useRBACProvider } from '@strapi/helper-plugin';
 
+declare type ContentManagerInitResponse = {
+  data: {
+    data: {
+      contentTypes: ContentType[],
+    },
+  },
+};
+
+declare type ContentManagerContentTypeConfigurationResponse = {
+  data: {
+    data: {
+      contentType: {
+        settings: {
+          mainField: string
+        }
+      }
+    }
+  }
+};
+
 declare type ContentType = {
   uid: string,
   kind: 'collectionType' | 'singleType',
@@ -52,14 +72,14 @@ declare type ContentType = {
   info: {
     displayName: string,
   },
-}
+};
 
 declare type ContentTypeNavLink = {
   uid: string,
   kind: 'collectionType' | 'singleType',
   label: string,
   to: string,
-}
+};
 
 declare type EntryItem = {
   id: number,
@@ -69,7 +89,7 @@ declare type EntryItem = {
     email: string,
   }[],
   [mainField: string]: unknown,
-}
+};
 
 declare type Permission = {
   action: string,
@@ -77,7 +97,7 @@ declare type Permission = {
   properties: {
     fields: string[],
   }
-}
+};
 
 const HomePage: React.FunctionComponent = () => {
   const { formatDate } = useIntl();
@@ -103,7 +123,7 @@ const HomePage: React.FunctionComponent = () => {
   useEffect(() => {
     setIsLoading(true);
     get('/content-manager/init')
-      .then(response => {
+      .then((response: ContentManagerInitResponse) => {
         const collectionTypeNavLinks = (response.data.data.contentTypes as ContentType[])
           .filter(contentType => contentType.isDisplayed && contentType.kind === 'collectionType' && uidMatcher(contentType.uid))
           .filter(contentType => allPermissions.some(permission => permission.action === `plugin::soft-delete.explorer.read` && permission.subject === contentType.uid))
@@ -135,7 +155,7 @@ const HomePage: React.FunctionComponent = () => {
           setActiveContentType(showableContentTypeNavLinks.filter(contentType => params.kind === contentType.kind && params.uid === contentType.uid)[0])
         }
       })
-      .catch(error => {
+      .catch((error: Error) => {
         setLoadingError(error);
       })
       .finally(() => {
@@ -152,18 +172,18 @@ const HomePage: React.FunctionComponent = () => {
 
     setIsLoading(true);
     get(`/content-manager/content-types/${activeContentType.uid}/configuration`)
-      .then(response => {
+      .then((response: ContentManagerContentTypeConfigurationResponse) => {
         setMainField(response.data.data.contentType.settings.mainField);
       })
-      .catch(error => {
+      .catch((error: Error) => {
         setLoadingError(error);
       });
 
     get(`/${pluginId}/${activeContentType.kind}/${activeContentType.uid}`)
-      .then(response => {
+      .then((response: { data: EntryItem[] }) => {
         setEntries(response.data);
       })
-      .catch(error => {
+      .catch((error: Error) => {
         setLoadingError(error);
       })
       .finally(() => {
@@ -179,7 +199,7 @@ const HomePage: React.FunctionComponent = () => {
     if (isRestoring) return;
 
     setIsRestoring(true);
-    put(`/${pluginId}/restore/${activeContentType?.kind}/${activeContentType?.uid}`, {
+    put(`/${pluginId}/${activeContentType?.kind}/${activeContentType?.uid}/restore`, {
       data: {
         ids: restoreModalEntriesIds,
       },
@@ -188,7 +208,7 @@ const HomePage: React.FunctionComponent = () => {
         setEntries(entries.filter(entry => !restoreModalEntriesIds.includes(entry.id)));
         setSelectedEntriesIds([]);
       })
-      .catch(error => {
+      .catch((error: Error) => {
         console.log(error); // TODO: Show error
       })
       .finally(() => {
@@ -202,7 +222,7 @@ const HomePage: React.FunctionComponent = () => {
     if (isDeletingPermanently) return;
 
     setIsDeletingPermanently(true);
-    put(`/${pluginId}/delete/${activeContentType?.kind}/${activeContentType?.uid}`, {
+    put(`/${pluginId}/${activeContentType?.kind}/${activeContentType?.uid}/delete`, {
       data: {
         ids: deletePermanentlyModalEntriesIds,
       }
@@ -211,7 +231,7 @@ const HomePage: React.FunctionComponent = () => {
         setEntries(entries.filter(entry => !deletePermanentlyModalEntriesIds.includes(entry.id)));
         setSelectedEntriesIds([]);
       })
-      .catch(error => {
+      .catch((error: Error) => {
         console.log(error); // TODO: Show error
       })
       .finally(() => {
@@ -229,7 +249,7 @@ const HomePage: React.FunctionComponent = () => {
               searchable
               value={search}
               onClear={() => setSearch("")}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e: any) => setSearch(e.target.value)}
               label="Soft Delete"
               searchLabel="Search..."
             />
@@ -547,15 +567,19 @@ const HomePage: React.FunctionComponent = () => {
           <ModalFooter
             startActions={
               <Button
-                onClick={() => setRestoreModalEntriesIds([])}
                 variant="tertiary"
+                onClick={() => setRestoreModalEntriesIds([])}
                 disabled={isRestoring}
               >
                 Cancel
               </Button>
             }
             endActions={
-              <Button onClick={confirmRestore} disabled={isRestoring}>
+              <Button
+                variant="default"
+                onClick={confirmRestore}
+                disabled={isRestoring}
+              >
                 Yes
               </Button>
             }
@@ -614,6 +638,7 @@ const HomePage: React.FunctionComponent = () => {
             }
             endActions={
               <Button
+                variant="danger"
                 onClick={confirmDeleteForever}
                 disabled={isDeletingPermanently}
               >

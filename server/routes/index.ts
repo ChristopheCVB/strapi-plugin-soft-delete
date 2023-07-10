@@ -17,7 +17,7 @@ export default [
   },
   {
     method: 'DELETE',
-    path: '/delete/:kind/:uid/:id',
+    path: '/:kind/:uid/:id/delete',
     handler: 'controller.delete',
     config: {
       policies: ['canDeletePermanently'],
@@ -25,7 +25,7 @@ export default [
   },
   {
     method: 'PUT',
-    path: '/restore/:kind/:uid/:id',
+    path: '/:kind/:uid/:id/restore',
     handler: 'controller.restore',
     config: {
       policies: ['canRestore'],
@@ -33,7 +33,7 @@ export default [
   },
   {
     method: 'PUT',
-    path: '/delete/:kind/:uid',
+    path: '/:kind/:uid/delete',
     handler: 'controller.deleteMany',
     config: {
       policies: ['canDeletePermanently'],
@@ -41,7 +41,7 @@ export default [
   },
   {
     method: 'PUT',
-    path: '/restore/:kind/:uid',
+    path: '/:kind/:uid/restore',
     handler: 'controller.restoreMany',
     config: {
       policies: ['canRestore'],

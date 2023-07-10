@@ -22,21 +22,28 @@
   ],
   "dependencies": {
     "@strapi/design-system": "^1.8.1",
+    "@strapi/helper-plugin": "^4.11.4",
     "@strapi/icons": "^1.8.1",
     "date-fns": "^2.30.0"
   },
   "devDependencies": {
-    "@strapi/helper-plugin": "^4.11.4",
+    "@strapi/typescript-utils": "^4.11.4",
     "@types/react": "^18.2.14",
+    "@types/react-dom": "^18.0.28",
     "@types/react-intl": "^3.0.0",
     "@types/react-router-dom": "^5.3.3",
     "react": "^18.2.0",
     "react-intl": "^6.4.4",
     "react-router-dom": "5.3.4",
+    "styled-components": "^5.3.6",
     "typescript": "5.1.6"
   },
   "peerDependencies": {
-    "@strapi/strapi": "^4.0.0"
+    "@strapi/strapi": "^4.0.0",
+    "react": "^17.0.0 || ^18.0.0",
+    "react-dom": "^17.0.0 || ^18.0.0",
+    "react-router-dom": "^5.3.4",
+    "styled-components": "^5.3.6"
   },
   "author": {
     "name": "Christophe Carvalho Vilas-Boas",
@@ -55,8 +62,8 @@
     "npm": ">=6.0.0"
   },
   "scripts": {
-    "develop": "tsc -w",
-    "build": "tsc"
+    "develop": "tsc -p tsconfig.server.json -w",
+    "build": "tsc -p tsconfig.server.json"
   },
   "license": "MIT"
 }

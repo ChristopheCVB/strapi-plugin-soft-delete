@@ -1,3 +1,4 @@
+import { Strapi } from '@strapi/strapi';
 import { uidMatcher } from "../utils";
 import { pluginId } from "../utils/plugin";
 
@@ -25,7 +26,7 @@ const sdWrapParams = async (defaultService: any, opts: any, ctx: { uid: string, 
   };
 }
 
-export default async ({ strapi }: { strapi: any }) => {
+export default async ({ strapi }: { strapi: Strapi & { admin: any } }) => {
   // Setup Permissions
   strapi.admin.services.permission.actionProvider.get('plugin::content-manager.explorer.delete').displayName = 'Soft Delete';
 
@@ -96,7 +97,7 @@ export default async ({ strapi }: { strapi: any }) => {
       const ctx = strapi.requestContext.get()
 
       const entitiesToDelete = await defaultService.findMany(uid, wrappedParams)
-      const deletedEntities = []
+      const deletedEntities: any[] = []
       for (let entityToDelete of entitiesToDelete) {
         const deletedEntity = await defaultService.update(uid, entityToDelete.id, {
           data: {
