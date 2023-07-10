@@ -32,9 +32,13 @@ A plugin for [Strapi Headless CMS](https://github.com/strapi/strapi) that provid
     - A new admin permission is added to the `Settings > Roles > Edit a Role > Collection Types | Single Types` section. This is the `Deleted Read` permission. This will allow the admin user to view the soft deleted entries.
     - A new admin permission is added to the `Settings > Roles > Edit a Role > Collection Types | Single Types` section. This is the `Deleted Restore` permission. This will allow the admin user to restore the soft deleted entries.
     - A new admin permission is added to the `Settings > Roles > Edit a Role > Collection Types | Single Types` section. This is the `Delete Permanently` permission. This will allow the admin user to delete permanently the soft deleted entries.
-- 🗂️ Adds a `Soft Delete` item in the Admin left Panel to access the Soft Deleted content explorer. This will list all the content types. You can restore or delete permanently the entries from here.
-  - Adds a `Restore` action through the Soft Delete in the Admin Panel to the content types. This will set the `deletedAt` field to `null` and `deletedBy` field to `null`, thus restoring it.
-  - Adds a `Delete Permanently` action through the Soft Delete in the Admin Panel to the content types. This will delete the entry permanently.
+    - A new admin permission is added to the `Settings > Roles > Edit a Role > Plugins > Soft Delete` section. This is the `Read` permission. This will allow the admin user to view the Soft Delete item in the Admin left Panel. Accessing this will list all the content types the admin user have access to. They can restore or delete permanently the entries from here.
+- 🗂️ Soft Delete Explorer (Admin left Panel item): Displays Soft Deleted Collection & Single Type entries 
+  - ♻️ Entries can be restored with the `Restore` action. This will set the `deletedAt` field to `null` and `deletedBy` field to `null`.
+    - Restoring an entry from the Soft Delete explorer will restore it to the Content Manager explorer.
+      - ⚠️ Restoring a Single Type entry may replace the existing entry. This is because Single Types are unique and can only have one entry (although they're stored like collections in databse).
+      - ℹ️ Restoring a Collection Type entry will restore it in the Content Manager explorer without changing its fields, meaning that if the Content Type supports Draft & Publish and its publication state was published, it will be restored as published.
+  - 🗑️ Entries can be permanently deleted with the `Delete Permanently` action. This will delete the entry permanently from the databse.
 
 <!-- - You can still access the content type by using the `includeSoftDeleted` query parameter. This will return all the content types including the soft deleted ones. -->
 
