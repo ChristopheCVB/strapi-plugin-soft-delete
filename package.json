@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-soft-delete",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Add a soft delete feature to your project",
   "strapi": {
     "name": "soft-delete",
