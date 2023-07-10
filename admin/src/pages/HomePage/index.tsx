@@ -34,7 +34,7 @@ import {
   ModalFooter,
   Button,
 } from '@strapi/design-system';
-import { Trash, ArrowLeft, Refresh, EmptyDocuments, Loader } from '@strapi/icons';
+import { Trash, ArrowLeft, Refresh, EmptyDocuments, EmptyPermissions, Loader } from '@strapi/icons';
 
 const { useState, useEffect } = React;
 import { useHistory, useParams } from 'react-router-dom'
@@ -45,7 +45,16 @@ import { useIntl } from 'react-intl';
 
 import { useRBACProvider } from '@strapi/helper-plugin';
 
-declare type ContentTypeItem = {
+declare type ContentType = {
+  uid: string,
+  kind: 'collectionType' | 'singleType',
+  isDisplayed: boolean,
+  info: {
+    displayName: string,
+  },
+}
+
+declare type ContentTypeNavLink = {
   uid: string,
   kind: 'collectionType' | 'singleType',
   label: string,
@@ -62,28 +71,40 @@ declare type EntryItem = {
   [mainField: string]: unknown,
 }
 
-const HomePage: React.VoidFunctionComponent = () => {
-  const { formatDate } = useIntl();
-  const params = useParams();
-  const history = useHistory();
-  const [search, setSearch] = useState(''); // TODO: Implement Conent Type search
-  const { get, put } = useFetchClient();
-  const { allPermissions } = useRBACProvider();
+declare type Permission = {
+  action: string,
+  subject: string | null,
+  properties: {
+    fields: string[],
+  }
+}
 
-  const [softDeletableCollectionTypes, setSoftDeletableCollectionTypes] = useState<ContentTypeItem[]>([]);
-  const [softDeletableSingleTypes, setSoftDeletableSingleTypes] = useState<ContentTypeItem[]>([]);
+const HomePage: React.FunctionComponent = () => {
+  const { formatDate } = useIntl();
+  const params: { kind: string, uid: string } = useParams();
+  const history = useHistory();
+  const [search, setSearch] = useState(''); // TODO: Implement Content Type search
+  const { get, put } = useFetchClient();
+  const { allPermissions }: { allPermissions: Permission[] } = useRBACProvider();
+
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [loadingError, setLoadingError] = useState<Error | null>(null);
+
+  const [contentTypeNavLinks, setContentTypeNavLinks] = useState<ContentTypeNavLink[]>([]);
+  const [activeContentType, setActiveContentType] = useState<ContentTypeNavLink | null>(null);
   const [mainField, setMainField] = useState<string| null>(null);
   const [entries, setEntries] = useState<EntryItem[]>([]);
+  const [selectedEntriesIds, setSelectedEntriesIds] = useState<number[]>([]);
 
-  const activeContentType = softDeletableCollectionTypes.concat(softDeletableSingleTypes).filter(contentType => params.uid === contentType.uid)[0]
   const canRestore = allPermissions.some(permission => permission.action === 'plugin::soft-delete.explorer.restore' && permission.subject === activeContentType?.uid);
   const canDeletePermanantly = allPermissions.some(permission => permission.action === 'plugin::soft-delete.explorer.delete-permanently' && permission.subject === activeContentType?.uid);
-  const canReadMainField = allPermissions.some(permission => permission.action === 'plugin::content-manager.explorer.read' && permission.subject === activeContentType?.uid && permission.properties.fields.includes(mainField));
+  const canReadMainField = mainField && allPermissions.some(permission => permission.action === 'plugin::content-manager.explorer.read' && permission.subject === activeContentType?.uid && permission.properties.fields.includes(mainField));
 
   useEffect(() => {
+    setIsLoading(true);
     get('/content-manager/init')
       .then(response => {
-        const collectionTypes = (response.data.data.contentTypes as any[])
+        const collectionTypeNavLinks = (response.data.data.contentTypes as ContentType[])
           .filter(contentType => contentType.isDisplayed && contentType.kind === 'collectionType' && uidMatcher(contentType.uid))
           .filter(contentType => allPermissions.some(permission => permission.action === `plugin::soft-delete.explorer.read` && permission.subject === contentType.uid))
           .map(contentType => ({
@@ -93,7 +114,7 @@ const HomePage: React.VoidFunctionComponent = () => {
             to: `/plugins/${pluginId}/collectionType/${contentType.uid}`,
           }));
 
-        const singleTypes = (response.data.data.contentTypes as any[])
+        const singleTypeNavLinks = (response.data.data.contentTypes as ContentType[])
           .filter(contentType => contentType.isDisplayed && contentType.kind === 'singleType' && uidMatcher(contentType.uid))
           .filter(contentType => allPermissions.some(permission => permission.action === `plugin::soft-delete.explorer.read` && permission.subject === contentType.uid))
           .map(contentType => ({
@@ -103,33 +124,52 @@ const HomePage: React.VoidFunctionComponent = () => {
             to: `/plugins/${pluginId}/singleType/${contentType.uid}`,
           }));
 
-        setSoftDeletableCollectionTypes(collectionTypes);
-        setSoftDeletableSingleTypes(singleTypes);
+        const showableContentTypeNavLinks = collectionTypeNavLinks.concat(singleTypeNavLinks);
+        setContentTypeNavLinks(showableContentTypeNavLinks);
 
-        const firstSoftDeletableContentType = collectionTypes.concat(singleTypes)[0];
-        if (firstSoftDeletableContentType && (!params.type || !params.uid)) {
-          history.push(`/plugins/${pluginId}/${firstSoftDeletableContentType.kind}/${firstSoftDeletableContentType.uid}`);
+        const firstContentTypeNavLink = showableContentTypeNavLinks[0];
+        if (firstContentTypeNavLink && (!params.kind || !params.uid)) {
+          history.push(`/plugins/${pluginId}/${firstContentTypeNavLink.kind}/${firstContentTypeNavLink.uid}`);
         }
+        else if (params.kind && params.uid) {
+          setActiveContentType(showableContentTypeNavLinks.filter(contentType => params.kind === contentType.kind && params.uid === contentType.uid)[0])
+        }
+      })
+      .catch(error => {
+        setLoadingError(error);
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
-  }, [params.type, params.uid])
-
-  const [selectedEntriesIds, setSelectedEntriesIds] = useState<number[]>([]);
+  }, [params.kind, params.uid])
 
   useEffect(() => {
     setSelectedEntriesIds([]);
     setEntries([]);
+    setMainField(null);
+
     if (!activeContentType) return;
 
+    setIsLoading(true);
     get(`/content-manager/content-types/${activeContentType.uid}/configuration`)
       .then(response => {
         setMainField(response.data.data.contentType.settings.mainField);
+      })
+      .catch(error => {
+        setLoadingError(error);
       });
 
     get(`/${pluginId}/${activeContentType.kind}/${activeContentType.uid}`)
       .then(response => {
         setEntries(response.data);
+      })
+      .catch(error => {
+        setLoadingError(error);
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
-  }, [params.type, params.uid, softDeletableCollectionTypes, softDeletableSingleTypes])
+  }, [activeContentType])
 
   const [restoreModalEntriesIds, setRestoreModalEntriesIds] = useState<number[]>([]);
   const [deletePermanentlyModalEntriesIds, setDeletePermanentlyModalEntriesIds] = useState<number[]>([]);
@@ -185,16 +225,16 @@ const HomePage: React.VoidFunctionComponent = () => {
       <Layout sideNav={<SubNav ariaLabel="Soft Delete sub nav">
         <SubNavHeader searchable value={search} onClear={() => setSearch('')} onChange={e => setSearch(e.target.value)} label="Soft Delete" searchLabel="Search..." />
             <SubNavSections>
-              <SubNavSection label="Collection Type" collapsable badgeLabel={softDeletableCollectionTypes.length.toString()}>
+              <SubNavSection label="Collection Type" collapsable badgeLabel={contentTypeNavLinks.filter(contentTypeNavLink => contentTypeNavLink.kind === 'collectionType').length.toString()}>
                 {
-                  softDeletableCollectionTypes.map((contentType, index) => <SubNavLink to={contentType.to} active={contentType.uid === activeContentType?.uid} key={index}>
+                  contentTypeNavLinks.filter(contentTypeNavLink => contentTypeNavLink.kind === 'collectionType').map((contentType, index) => <SubNavLink to={contentType.to} active={contentType.uid === activeContentType?.uid} key={index}>
                     {contentType.label}
                   </SubNavLink>)
                 }
               </SubNavSection>
-              <SubNavSection label="Single Type" collapsable badgeLabel={softDeletableSingleTypes.length.toString()}>
+              <SubNavSection label="Single Type" collapsable badgeLabel={contentTypeNavLinks.filter(contentTypeNavLink => contentTypeNavLink.kind === 'singleType').length.toString()}>
                 {
-                  softDeletableSingleTypes.map((contentType, index) => <SubNavLink to={contentType.to} active={contentType.uid === activeContentType?.uid} key={index}>
+                  contentTypeNavLinks.filter(contentTypeNavLink => contentTypeNavLink.kind === 'singleType').map((contentType, index) => <SubNavLink to={contentType.to} active={contentType.uid === activeContentType?.uid} key={index}>
                     {contentType.label}
                   </SubNavLink>)
                 }
@@ -207,7 +247,7 @@ const HomePage: React.VoidFunctionComponent = () => {
               Go back
             </Link>
           } title={activeContentType?.label || ''} subtitle={entries.length + " entries found"} as="h2" />}
-          {activeContentType && <ContentLayout>
+          {!isLoading && activeContentType && <ContentLayout>
             <Table colCount={mainField && mainField != 'id' && canReadMainField ? 6 : 5} rowCount={entries.length + 1}>
               <Thead>
                 <Tr>
@@ -224,10 +264,10 @@ const HomePage: React.VoidFunctionComponent = () => {
                     <Typography variant="sigma">ID</Typography>
                   </Th>
                   <Th>
-                    <Typography variant="sigma">Soft Deleted At</Typography>
+                    <Typography variant="sigma">SoftDeletedAt</Typography>
                   </Th>
                   <Th>
-                    <Typography variant="sigma">Soft Deleted By</Typography>
+                    <Typography variant="sigma">SoftDeletedBy</Typography>
                   </Th>
                   {mainField && mainField != 'id' && canReadMainField && <Th>
                     <Typography variant="sigma">{mainField}</Typography>
@@ -282,6 +322,17 @@ const HomePage: React.VoidFunctionComponent = () => {
               </Tbody>
             </Table>
           </ContentLayout>}
+          {isLoading && <Flex justifyContent="center" alignItems="center" height="100%">
+            <Loader width="20rem" height="20rem" />
+          </Flex>}
+          {!isLoading && loadingError && <Flex direction="column" gap="2" justifyContent="center" alignItems="center" height="100%">
+            <Typography variant="delta" textColor="neutral600">Error loading entries</Typography>
+            <Typography variant="delta" textColor="neutral600">{loadingError.message}</Typography>
+          </Flex>}
+          {!isLoading && !loadingError && !activeContentType && <Flex direction="column" gap="2" justifyContent="center" alignItems="center" height="100%">
+            <EmptyPermissions width="10rem" height="5.5rem" />
+            <Typography variant="delta" textColor="neutral600">You don't have the permissions to access that content</Typography>
+          </Flex>}
         </>
       </Layout>
       {restoreModalEntriesIds.length && <ModalLayout onClose={!isRestoring ? () => setRestoreModalEntriesIds([]) : null} labelledBy="title">

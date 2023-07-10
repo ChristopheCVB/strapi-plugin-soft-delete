@@ -80,8 +80,8 @@ export default async ({ strapi }: { strapi: any }) => {
         ...wrappedParams,
         data: {
           ...wrappedParams.data,
-          softDeletedAt: new Date().getTime(),
-          softDeletedBy: [ctx.state.user.id],
+          softDeletedAt: Date.now(),
+          softDeletedBy: [ctx.state.user.id], // TODO: Check if this is an admin user
         },
       });
     },
@@ -100,8 +100,8 @@ export default async ({ strapi }: { strapi: any }) => {
       for (let entityToDelete of entitiesToDelete) {
         const deletedEntity = await defaultService.update(uid, entityToDelete.id, {
           data: {
-            softDeletedAt: new Date().getTime(),
-            softDeletedBy: [ctx.state.user.id],
+            softDeletedAt: Date.now(),
+            softDeletedBy: [ctx.state.user.id], // TODO: Check if this is an admin user
           },
         })
         if (deletedEntity) {

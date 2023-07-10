@@ -1,4 +1,3 @@
-import React from 'react';
 import { prefixPluginTranslations } from '@strapi/helper-plugin';
 import { pluginId, name } from '../../utils/plugin';
 import Initializer from './components/Initializer';
