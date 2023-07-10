@@ -1,5 +1,16 @@
+
+<div align="center" width="150px">
+  <img style="width: 150px; height: auto;" src="public/assets/logo.png" alt="Logo - Strapi Soft Delete plugin" />
+</div>
 <div align="center">
   <h1>Strapi v4 - Soft Delete plugin</h1>
+  <p>Powerful Strapi based Soft Delete feature, never loose content again</p>
+  <a href="https://www.npmjs.org/package/strapi-plugin-soft-delete">
+    <img alt="GitHub package.json version" src="https://img.shields.io/github/package-json/v/ChristopheCVB/strapi-plugin-soft-delete?label=npm&logo=npm">
+  </a>
+  <a href="https://www.npmjs.org/package/strapi-plugin-soft-delete">
+    <img src="https://img.shields.io/npm/dm/strapi-plugin-soft-delete.svg" alt="Monthly download on NPM" />
+  </a>
 </div>
 
 ---
