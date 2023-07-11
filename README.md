@@ -24,9 +24,9 @@ A plugin for [Strapi Headless CMS](https://github.com/strapi/strapi) that provid
 ## ✨ Features
 
 - 🛢 Database
-  - Adds `deletedAt` and `deletedBy` fields to all your collection and single content types.
+  - Adds `softDeletedAt` and `softDeletedBy` fields to all your collection and single content types.
 - 🗂️ Content Manager & API
-  - The normal delete functionality behaves as the soft delete. It will set the `deletedAt` field to the current date and `deletedBy` field to the admin role that deleted it.
+  - The normal delete functionality behaves as the soft delete. It will set the `softDeletedAt` field to the current date and `softDeletedBy` field to the user that deleted it.
 - 👤 RBAC
   - The `Delete` is renamed to `Soft Delete` and it is located in the `Settings > Roles > Edit a Role > Collection Types | Single Types` section.
   - A new admin permission is added to the `Settings > Roles > Edit a Role > Collection Types | Single Types` section. This is the `Deleted Read` permission. This will allow the admin role to view the soft deleted entries.
@@ -34,13 +34,22 @@ A plugin for [Strapi Headless CMS](https://github.com/strapi/strapi) that provid
   - A new admin permission is added to the `Settings > Roles > Edit a Role > Collection Types | Single Types` section. This is the `Delete Permanently` permission. This will allow the admin role to delete permanently the soft deleted entries.
   - A new admin permission is added to the `Settings > Roles > Edit a Role > Plugins > Soft Delete` section. This is the global `Read` permission of the plugin. This will allow the admin role to view the Soft Delete item in the Admin left Panel. Accessing this will list all the content types the admin role have access to. They can restore or delete permanently the entries from here.
 - 🗂️ Soft Delete Explorer (Admin left Panel item): Displays Soft Deleted Collection & Single Type entries 
-  - ♻️ Entries can be restored with the `Restore` action. This will set the `deletedAt` field to `null` and `deletedBy` field to `null`.
+  - ♻️ Entries can be restored with the `Restore` action. This will set the `softDeletedAt` field to `null` and `softDeletedBy` field to `null`.
     - Restoring an entry from the Soft Delete explorer will restore it to the Content Manager explorer.
       - ⚠️ Restoring a Single Type entry may replace the existing entry. This is because Single Types are unique and can only have one entry (although they're stored like collections in databse).
       - ℹ️ Restoring a Collection Type entry will restore it in the Content Manager explorer without changing its fields, meaning that if the Content Type supports Draft & Publish and its publication state was published, it will be restored as published.
   - 🗑️ Entries can be permanently deleted with the `Delete Permanently` action. This will delete the entry permanently from the databse.
 
 <!-- - You can still access the content type by using the `includeSoftDeleted` query parameter. This will return all the content types including the soft deleted ones. -->
+
+## ⛔ Permissions
+
+| Section | Permission | Description |
+| ---------- | ---------- | ----------- |
+| Collection Type & Single Type | `Deleted Read` | Allows the admin role to view the soft deleted entries. |
+| Collection Type & Single Type | `Deleted Restore` | Allows the admin role to restore the soft deleted entries. |
+| Collection Type & Single Type | `Delete Permanently` | Allows the admin role to delete permanently the soft deleted entries. |
+| Plugins | `Read` | Allows the admin role to view the Soft Delete item in the Admin left Panel. |
 
 ## 📦 Compatibility
 
@@ -108,33 +117,24 @@ Feel free to fork and make a PR if you want to add something or fix a bug.
 
 ## 🛣️ Roadmap
 
-- [ ] Server
+- 🖧 Server
   - [x] `softDeletedAt` field on API Content Types
   - [ ] `softDeletedById` field on API Content Types
   - [ ] `softDeletedByType` field on API Content Types
   - [x] Decorate Content Type Entity Services to handle `softDeleted*` fields when deleting an entry upon `delete` or `deleteMany` methods
   - [x] Decorate Content Type Entity Services to hide entries upon `find` or `findMany` methods
   - [x] RBAC Permissions
-  - [ ] Plugin Configuration
+  - ⚙️ Plugin Configuration
     - [ ] Draft & Publish support when restoring an entry
     - [ ] Single Type entry restore behavior
   - [ ] Handle Soft Deleting Components
-- [x] Soft Delete Explorer
+- 🗂️ Soft Delete Explorer
   - [x] Content Types list
   - [x] Entries list
   - [x] Restore action
   - [x] Delete Permanently action
   - [ ] Soft Deleted Entry details
 - [ ] Add tests
-
-## ⛔ Permissions
-
-| Section | Permission | Description |
-| ---------- | ---------- | ----------- |
-| Collection Type & Single Type | `Deleted Read` | Allows the admin role to view the soft deleted entries. |
-| Collection Type & Single Type | `Deleted Restore` | Allows the admin role to restore the soft deleted entries. |
-| Collection Type & Single Type | `Delete Permanently` | Allows the admin role to delete permanently the soft deleted entries. |
-| Plugins | `Read` | Allows the admin role to view the Soft Delete item in the Admin left Panel. |
 
 ## 👨‍💻 Community support
 
