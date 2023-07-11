@@ -48,7 +48,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       },
       data: {
         softDeletedAt: null,
-        softDeletedBy: [],
+        softDeletedBy: null,
       },
     });
   },
@@ -72,7 +72,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       },
       data: {
         softDeletedAt: null,
-        softDeletedBy: [],
+        softDeletedBy: null,
       },
     });
   },

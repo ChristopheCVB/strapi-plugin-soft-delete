@@ -26,6 +26,13 @@ const sdWrapParams = async (defaultService: any, opts: any, ctx: { uid: string, 
   };
 }
 
+const getSoftDeletedBy = (ctx: any) => {
+  const authId: number | null = ctx.state.auth.credentials?.id || null
+  const authStrategy: string = ctx.state.auth.strategy.name
+
+  return { authId, authStrategy }
+}
+
 export default async ({ strapi }: { strapi: Strapi & { admin: any } }) => {
   // Setup Permissions
   strapi.admin.services.permission.actionProvider.get('plugin::content-manager.explorer.delete').displayName = 'Soft Delete';
@@ -76,14 +83,16 @@ export default async ({ strapi }: { strapi: Strapi & { admin: any } }) => {
       const wrappedParams = await defaultService.wrapParams(opts, { uid, action: 'delete' })
 
       const ctx = strapi.requestContext.get()
+      const { authId, authStrategy } = getSoftDeletedBy(ctx)
 
       return await defaultService.update(uid, id, {
         ...wrappedParams,
         data: {
           ...wrappedParams.data,
           softDeletedAt: Date.now(),
-          softDeletedBy: [ctx.state.user.id], // FIXME: softDeletedById
-          // softDeletedByType: ctx.state.user.type, // FIXME: softDeletedByType
+          softDeletedBy: authId ? [authId] : null, // FIXME: Replace softDeletedBy by softDeletedById and softDeletedByType
+          // softDeletedById: authId,// FIXME: softDeletedById
+          // softDeletedByType: authStrategy, // FIXME: softDeletedByType
         },
       });
     },
@@ -96,6 +105,7 @@ export default async ({ strapi }: { strapi: Strapi & { admin: any } }) => {
       const wrappedParams = await defaultService.wrapParams(opts, { uid, action: 'deleteMany' })
 
       const ctx = strapi.requestContext.get()
+      const { authId, authStrategy } = getSoftDeletedBy(ctx)
 
       const entitiesToDelete = await defaultService.findMany(uid, wrappedParams)
       const deletedEntities: any[] = []
@@ -103,8 +113,9 @@ export default async ({ strapi }: { strapi: Strapi & { admin: any } }) => {
         const deletedEntity = await defaultService.update(uid, entityToDelete.id, {
           data: {
             softDeletedAt: Date.now(),
-            softDeletedBy: [ctx.state.user.id], // FIXME: softDeletedById
-            // softDeletedByType: ctx.state.user.type, // FIXME: softDeletedByType
+            softDeletedBy: authId ? [authId] : null, // FIXME: Replace softDeletedBy by softDeletedById and softDeletedByType
+            // softDeletedById: userId,// FIXME: softDeletedById
+            // softDeletedByType: authStrategy, // FIXME: softDeletedByType
           },
         })
         if (deletedEntity) {

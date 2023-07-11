@@ -53,7 +53,7 @@ declare type ContentManagerInitResponse = {
   },
 };
 
-declare type ContentManagerContentTypeConfigurationResponse = {
+declare type ContentManagerConfigurationResponse = {
   data: {
     data: {
       contentType: {
@@ -81,7 +81,7 @@ declare type ContentTypeNavLink = {
   to: string,
 };
 
-declare type EntryItem = {
+declare type ContentTypeEntry = {
   id: number,
   softDeletedAt: string,
   softDeletedBy: {
@@ -113,20 +113,41 @@ const HomePage: React.FunctionComponent = () => {
   const [contentTypeNavLinks, setContentTypeNavLinks] = useState<ContentTypeNavLink[]>([]);
   const [activeContentType, setActiveContentType] = useState<ContentTypeNavLink | null>(null);
   const [mainField, setMainField] = useState<string| null>(null);
-  const [entries, setEntries] = useState<EntryItem[]>([]);
-  const [selectedEntriesIds, setSelectedEntriesIds] = useState<number[]>([]);
+  const [entries, setEntries] = useState<ContentTypeEntry[]>([]);
+  const [selectedEntriesId, setSelectedEntriesId] = useState<number[]>([]);
 
-  const canRestore = allPermissions.some(permission => permission.action === 'plugin::soft-delete.explorer.restore' && permission.subject === activeContentType?.uid);
-  const canDeletePermanantly = allPermissions.some(permission => permission.action === 'plugin::soft-delete.explorer.delete-permanently' && permission.subject === activeContentType?.uid);
-  const canReadMainField = mainField && allPermissions.some(permission => permission.action === 'plugin::content-manager.explorer.read' && permission.subject === activeContentType?.uid && permission.properties.fields.includes(mainField));
+  const canRestore = allPermissions.some(permission =>
+    permission.action === 'plugin::soft-delete.explorer.restore' &&
+    permission.subject === activeContentType?.uid
+  );
+  const canDeletePermanantly = allPermissions.some(permission =>
+    permission.action === 'plugin::soft-delete.explorer.delete-permanently' &&
+    permission.subject === activeContentType?.uid
+  );
+  const canReadMainField = mainField && allPermissions.some(permission =>
+    permission.action === 'plugin::content-manager.explorer.read' &&
+    permission.subject === activeContentType?.uid &&
+    permission.properties.fields.includes(mainField)
+  );
 
   useEffect(() => {
     setIsLoading(true);
     get('/content-manager/init')
       .then((response: ContentManagerInitResponse) => {
         const collectionTypeNavLinks = (response.data.data.contentTypes as ContentType[])
-          .filter(contentType => contentType.isDisplayed && contentType.kind === 'collectionType' && uidMatcher(contentType.uid))
-          .filter(contentType => allPermissions.some(permission => permission.action === `plugin::soft-delete.explorer.read` && permission.subject === contentType.uid))
+          // Filter out hidden content types and content types that don't match the uid matcher
+          .filter(contentType =>
+            contentType.isDisplayed &&
+            contentType.kind === 'collectionType' &&
+            uidMatcher(contentType.uid)
+          )
+          // Filter out content types that the user doesn't have the permission to access
+          .filter(contentType =>
+            allPermissions.some(permission =>
+              permission.action === 'plugin::soft-delete.explorer.read' &&
+              permission.subject === contentType.uid
+            )
+          )
           .map(contentType => ({
             uid: contentType.uid,
             kind: contentType.kind,
@@ -135,8 +156,19 @@ const HomePage: React.FunctionComponent = () => {
           }));
 
         const singleTypeNavLinks = (response.data.data.contentTypes as ContentType[])
-          .filter(contentType => contentType.isDisplayed && contentType.kind === 'singleType' && uidMatcher(contentType.uid))
-          .filter(contentType => allPermissions.some(permission => permission.action === `plugin::soft-delete.explorer.read` && permission.subject === contentType.uid))
+          // Filter out hidden content types and content types that don't match the uid matcher
+          .filter(contentType =>
+            contentType.isDisplayed &&
+            contentType.kind === 'singleType' &&
+            uidMatcher(contentType.uid)
+          )
+          // Filter out content types that the user doesn't have the permission to access
+          .filter(contentType =>
+            allPermissions.some(permission =>
+              permission.action === 'plugin::soft-delete.explorer.read' &&
+              permission.subject === contentType.uid
+            )
+          )
           .map(contentType => ({
             uid: contentType.uid,
             kind: contentType.kind,
@@ -152,7 +184,12 @@ const HomePage: React.FunctionComponent = () => {
           history.push(`/plugins/${pluginId}/${firstContentTypeNavLink.kind}/${firstContentTypeNavLink.uid}`);
         }
         else if (params.kind && params.uid) {
-          setActiveContentType(showableContentTypeNavLinks.filter(contentType => params.kind === contentType.kind && params.uid === contentType.uid)[0])
+          setActiveContentType(
+            showableContentTypeNavLinks.filter(contentType =>
+              params.kind === contentType.kind &&
+              params.uid === contentType.uid
+            )[0]
+          )
         }
       })
       .catch((error: Error) => {
@@ -164,7 +201,7 @@ const HomePage: React.FunctionComponent = () => {
   }, [params.kind, params.uid])
 
   useEffect(() => {
-    setSelectedEntriesIds([]);
+    setSelectedEntriesId([]);
     setEntries([]);
     setMainField(null);
 
@@ -172,7 +209,7 @@ const HomePage: React.FunctionComponent = () => {
 
     setIsLoading(true);
     get(`/content-manager/content-types/${activeContentType.uid}/configuration`)
-      .then((response: ContentManagerContentTypeConfigurationResponse) => {
+      .then((response: ContentManagerConfigurationResponse) => {
         setMainField(response.data.data.contentType.settings.mainField);
       })
       .catch((error: Error) => {
@@ -180,7 +217,7 @@ const HomePage: React.FunctionComponent = () => {
       });
 
     get(`/${pluginId}/${activeContentType.kind}/${activeContentType.uid}`)
-      .then((response: { data: EntryItem[] }) => {
+      .then((response: { data: ContentTypeEntry[] }) => {
         setEntries(response.data);
       })
       .catch((error: Error) => {
@@ -191,8 +228,8 @@ const HomePage: React.FunctionComponent = () => {
       });
   }, [activeContentType])
 
-  const [restoreModalEntriesIds, setRestoreModalEntriesIds] = useState<number[]>([]);
-  const [deletePermanentlyModalEntriesIds, setDeletePermanentlyModalEntriesIds] = useState<number[]>([]);
+  const [restoreModalEntriesId, setRestoreModalEntriesId] = useState<number[]>([]);
+  const [deletePermanentlyModalEntriesId, setDeletePermanentlyModalEntriesId] = useState<number[]>([]);
 
   const [isRestoring, setIsRestoring] = useState<boolean>(false);
   const confirmRestore = () => {
@@ -201,41 +238,41 @@ const HomePage: React.FunctionComponent = () => {
     setIsRestoring(true);
     put(`/${pluginId}/${activeContentType?.kind}/${activeContentType?.uid}/restore`, {
       data: {
-        ids: restoreModalEntriesIds,
+        ids: restoreModalEntriesId,
       },
     })
       .then(() => {
-        setEntries(entries.filter(entry => !restoreModalEntriesIds.includes(entry.id)));
-        setSelectedEntriesIds([]);
+        setEntries(entries.filter(entry => !restoreModalEntriesId.includes(entry.id)));
+        setSelectedEntriesId([]);
       })
       .catch((error: Error) => {
-        console.log(error); // TODO: Show error
+        console.log(error); // TODO: Show Restore error
       })
       .finally(() => {
-        setRestoreModalEntriesIds([]);
+        setRestoreModalEntriesId([]);
         setIsRestoring(false);
       });
   };
 
   const [isDeletingPermanently, setIsDeletingPermanently] = useState<boolean>(false);
-  const confirmDeleteForever = () => {
+  const confirmDeletePermanently = () => {
     if (isDeletingPermanently) return;
 
     setIsDeletingPermanently(true);
     put(`/${pluginId}/${activeContentType?.kind}/${activeContentType?.uid}/delete`, {
       data: {
-        ids: deletePermanentlyModalEntriesIds,
+        ids: deletePermanentlyModalEntriesId,
       }
     })
       .then(() => {
-        setEntries(entries.filter(entry => !deletePermanentlyModalEntriesIds.includes(entry.id)));
-        setSelectedEntriesIds([]);
+        setEntries(entries.filter(entry => !deletePermanentlyModalEntriesId.includes(entry.id)));
+        setSelectedEntriesId([]);
       })
       .catch((error: Error) => {
-        console.log(error); // TODO: Show error
+        console.log(error); // TODO: Show Delete Permanently error
       })
       .finally(() => {
-        setDeletePermanentlyModalEntriesIds([]);
+        setDeletePermanentlyModalEntriesId([]);
         setIsDeletingPermanently(false);
       });
   };
@@ -340,17 +377,17 @@ const HomePage: React.FunctionComponent = () => {
                         }
                         checked={
                           entries.length &&
-                          selectedEntriesIds.length === entries.length
+                          selectedEntriesId.length === entries.length
                         }
                         indeterminate={
                           entries.length &&
-                          selectedEntriesIds.length &&
-                          selectedEntriesIds.length !== entries.length
+                          selectedEntriesId.length &&
+                          selectedEntriesId.length !== entries.length
                         }
                         onChange={() =>
-                          selectedEntriesIds.length === entries.length
-                            ? setSelectedEntriesIds([])
-                            : setSelectedEntriesIds(
+                          selectedEntriesId.length === entries.length
+                            ? setSelectedEntriesId([])
+                            : setSelectedEntriesId(
                                 entries.map((entry) => entry.id)
                               )
                         }
@@ -371,13 +408,13 @@ const HomePage: React.FunctionComponent = () => {
                       </Th>
                     )}
                     <Th>
-                      {(selectedEntriesIds.length && (
+                      {(selectedEntriesId.length && (
                         <Flex justifyContent="end" gap="1" width="100%">
                           {canRestore && (
                             <IconButton
                               onClick={() => {
-                                setDeletePermanentlyModalEntriesIds([]);
-                                setRestoreModalEntriesIds(selectedEntriesIds);
+                                setDeletePermanentlyModalEntriesId([]);
+                                setRestoreModalEntriesId(selectedEntriesId);
                               }}
                               label="Restore"
                               icon={<Refresh />}
@@ -386,12 +423,12 @@ const HomePage: React.FunctionComponent = () => {
                           {canDeletePermanantly && (
                             <IconButton
                               onClick={() => {
-                                setRestoreModalEntriesIds([]);
-                                setDeletePermanentlyModalEntriesIds(
-                                  selectedEntriesIds
+                                setRestoreModalEntriesId([]);
+                                setDeletePermanentlyModalEntriesId(
+                                  selectedEntriesId
                                 );
                               }}
-                              label="Delete forever"
+                              label="Delete Permanently"
                               icon={<Trash />}
                             />
                           )}
@@ -408,16 +445,16 @@ const HomePage: React.FunctionComponent = () => {
                           <BaseCheckbox
                             aria-label={`Select ${entry.name}`}
                             disabled={!canRestore && !canDeletePermanantly}
-                            checked={selectedEntriesIds.includes(entry.id)}
+                            checked={selectedEntriesId.includes(entry.id)}
                             onChange={() =>
-                              selectedEntriesIds.includes(entry.id)
-                                ? setSelectedEntriesIds(
-                                    selectedEntriesIds.filter(
+                              selectedEntriesId.includes(entry.id)
+                                ? setSelectedEntriesId(
+                                    selectedEntriesId.filter(
                                       (item) => item !== entry.id
                                     )
                                   )
-                                : setSelectedEntriesIds([
-                                    ...selectedEntriesIds,
+                                : setSelectedEntriesId([
+                                    ...selectedEntriesId,
                                     entry.id,
                                   ])
                             }
@@ -455,8 +492,8 @@ const HomePage: React.FunctionComponent = () => {
                             {canRestore && (
                               <IconButton
                                 onClick={() => {
-                                  setDeletePermanentlyModalEntriesIds([]);
-                                  setRestoreModalEntriesIds([entry.id]);
+                                  setDeletePermanentlyModalEntriesId([]);
+                                  setRestoreModalEntriesId([entry.id]);
                                 }}
                                 label="Restore"
                                 icon={<Refresh />}
@@ -465,12 +502,12 @@ const HomePage: React.FunctionComponent = () => {
                             {canDeletePermanantly && (
                               <IconButton
                                 onClick={() => {
-                                  setRestoreModalEntriesIds([]);
-                                  setDeletePermanentlyModalEntriesIds([
+                                  setRestoreModalEntriesId([]);
+                                  setDeletePermanentlyModalEntriesId([
                                     entry.id,
                                   ]);
                                 }}
-                                label="Delete forever"
+                                label="Delete Permanently"
                                 icon={<Trash />}
                               />
                             )}
@@ -530,9 +567,9 @@ const HomePage: React.FunctionComponent = () => {
           )}
         </>
       </Layout>
-      {(restoreModalEntriesIds.length && (
+      {(restoreModalEntriesId.length && (
         <ModalLayout
-          onClose={!isRestoring ? () => setRestoreModalEntriesIds([]) : null}
+          onClose={!isRestoring ? () => setRestoreModalEntriesId([]) : null}
           labelledBy="title"
         >
           <ModalHeader>
@@ -549,16 +586,16 @@ const HomePage: React.FunctionComponent = () => {
             {(isRestoring && <Loader width="10rem" height="10rem" /> && (
               <Typography textColor="neutral800">
                 Restoring{" "}
-                {restoreModalEntriesIds.length > 1
-                  ? `${restoreModalEntriesIds.length} entries`
+                {restoreModalEntriesId.length > 1
+                  ? `${restoreModalEntriesId.length} entries`
                   : "one entry"}
                 ?
               </Typography>
             )) || (
               <Typography textColor="neutral800">
                 Are you sure you want to restore{" "}
-                {restoreModalEntriesIds.length > 1
-                  ? `${restoreModalEntriesIds.length} entries`
+                {restoreModalEntriesId.length > 1
+                  ? `${restoreModalEntriesId.length} entries`
                   : "one entry"}
                 ?
               </Typography>
@@ -568,7 +605,7 @@ const HomePage: React.FunctionComponent = () => {
             startActions={
               <Button
                 variant="tertiary"
-                onClick={() => setRestoreModalEntriesIds([])}
+                onClick={() => setRestoreModalEntriesId([])}
                 disabled={isRestoring}
               >
                 Cancel
@@ -586,11 +623,11 @@ const HomePage: React.FunctionComponent = () => {
           />
         </ModalLayout>
       )) || <></>}
-      {(deletePermanentlyModalEntriesIds.length && (
+      {(deletePermanentlyModalEntriesId.length && (
         <ModalLayout
           onClose={
             !isDeletingPermanently
-              ? () => setDeletePermanentlyModalEntriesIds([])
+              ? () => setDeletePermanentlyModalEntriesId([])
               : null
           }
           labelledBy="title"
@@ -611,16 +648,16 @@ const HomePage: React.FunctionComponent = () => {
               ) && (
                 <Typography textColor="neutral800">
                   Restoring{" "}
-                  {deletePermanentlyModalEntriesIds.length > 1
-                    ? `${deletePermanentlyModalEntriesIds.length} entries`
+                  {deletePermanentlyModalEntriesId.length > 1
+                    ? `${deletePermanentlyModalEntriesId.length} entries`
                     : "one entry"}
                   ?
                 </Typography>
               )) || (
               <Typography textColor="neutral800">
                 Are you sure you want to permanently delete{" "}
-                {deletePermanentlyModalEntriesIds.length > 1
-                  ? `${deletePermanentlyModalEntriesIds.length} entries`
+                {deletePermanentlyModalEntriesId.length > 1
+                  ? `${deletePermanentlyModalEntriesId.length} entries`
                   : "one entry"}
                 ?
               </Typography>
@@ -629,7 +666,7 @@ const HomePage: React.FunctionComponent = () => {
           <ModalFooter
             startActions={
               <Button
-                onClick={() => setDeletePermanentlyModalEntriesIds([])}
+                onClick={() => setDeletePermanentlyModalEntriesId([])}
                 variant="tertiary"
                 disabled={isDeletingPermanently}
               >
@@ -639,7 +676,7 @@ const HomePage: React.FunctionComponent = () => {
             endActions={
               <Button
                 variant="danger"
-                onClick={confirmDeleteForever}
+                onClick={confirmDeletePermanently}
                 disabled={isDeletingPermanently}
               >
                 Yes

@@ -66,6 +66,16 @@ pnpm add strapi-plugin-soft-delete
 npm install strapi-plugin-soft-delete
 ```
 
+Edit your `config/plugins.js|ts` or `config/<env>/plugins.js|ts` file and add the following configuration:
+
+```js
+// ...
+  "soft-delete": {
+    enabled: true,
+  },
+// ...
+```
+
 Then, you'll need to build your admin panel:
 
 ```sh
@@ -77,16 +87,6 @@ pnpm run build
 
 # Or using NPM
 npm run build
-```
-
-Edit your `config/plugins.js|ts` or `config/<env>/plugins.js|ts` file and add the following configuration:
-
-```js
-// ...
-  "soft-delete": {
-    enabled: true,
-  },
-// ...
 ```
 
 Finally, start your application:
@@ -118,22 +118,22 @@ Feel free to fork and make a PR if you want to add something or fix a bug.
   - [ ] Plugin Configuration
     - [ ] Draft & Publish support when restoring an entry
     - [ ] Single Type entry restore behavior
-  - [ ] Handle Components
+  - [ ] Handle Soft Deleting Components
 - [x] Soft Delete Explorer
   - [x] Content Types list
   - [x] Entries list
   - [x] Restore action
   - [x] Delete Permanently action
-  - [ ] Entry details
+  - [ ] Soft Deleted Entry details
 - [ ] Add tests
 
-## 📚 Permissions
+## ⛔ Permissions
 
 | Section | Permission | Description |
 | ---------- | ---------- | ----------- |
-| Content Type \| Single Type | `Deleted Read` | Allows the admin role to view the soft deleted entries. |
-| Content Type \| Single Type | `Deleted Restore` | Allows the admin role to restore the soft deleted entries. |
-| Content Type \| Single Type | `Delete Permanently` | Allows the admin role to delete permanently the soft deleted entries. |
+| Collection Type & Single Type | `Deleted Read` | Allows the admin role to view the soft deleted entries. |
+| Collection Type & Single Type | `Deleted Restore` | Allows the admin role to restore the soft deleted entries. |
+| Collection Type & Single Type | `Delete Permanently` | Allows the admin role to delete permanently the soft deleted entries. |
 | Plugins | `Read` | Allows the admin role to view the Soft Delete item in the Admin left Panel. |
 
 ## 👨‍💻 Community support

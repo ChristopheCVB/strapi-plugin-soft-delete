@@ -4,7 +4,7 @@ import { uidMatcher } from "../utils";
 export default ({ strapi }: { strapi: Strapi }) => {
   for (
     let contentTypeRecord of Object.entries(strapi.contentTypes)
-    // .concat(Object.entries(strapi.components)) // TODO: Deleting a compoment doesn't use the entityService.delete or entityService.deleteMany
+    // .concat(Object.entries(strapi.components)) // TODO: Deleting a compoment doesn't use the entityService.delete nor entityService.deleteMany
   ) {
     const [uid, contentType] = contentTypeRecord as [uid: string, type: any];
     if (uidMatcher(uid)) {
@@ -18,7 +18,7 @@ export default ({ strapi }: { strapi: Strapi }) => {
       contentType.attributes.softDeletedAt = softDeletedAt;
       contentType.__schema__.attributes.softDeletedAt = softDeletedAt;
 
-      const softDeletedBy = { // FIXME: softDeletedById
+      const softDeletedBy = { // FIXME: replace with softDeletedById and softDeletedByType
         type: "relation",
         relation: "oneToMany",
         target: "admin::user",
@@ -29,6 +29,26 @@ export default ({ strapi }: { strapi: Strapi }) => {
       };
       contentType.attributes.softDeletedBy = softDeletedBy;
       contentType.__schema__.attributes.softDeletedBy = softDeletedBy;
+
+      // const softDeletedById = { // FIXME: softDeletedById
+      //   type: "biginteger",
+      //   configurable: false,
+      //   writable: false,
+      //   visible: false,
+      //   private: true,
+      // };
+      // contentType.attributes.softDeletedById = softDeletedById;
+      // contentType.__schema__.attributes.softDeletedById = softDeletedById;
+
+      // const softDeletedByType = { // FIXME: softDeletedByType
+      //   type: "string",
+      //   configurable: false,
+      //   writable: false,
+      //   visible: false,
+      //   private: true,
+      // };
+      // contentType.attributes.softDeletedById = softDeletedByType;
+      // contentType.__schema__.attributes.softDeletedById = softDeletedByType;
 
       // FIXME: softDeletedByType
     }
