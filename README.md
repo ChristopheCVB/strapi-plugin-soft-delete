@@ -24,23 +24,21 @@ A plugin for [Strapi Headless CMS](https://github.com/strapi/strapi) that provid
 ## ✨ Features
 
 - 🛢 Database
-  - Adds `_softDeletedAt`, `_softDeletedById` and `_softDeletedByType` fields to all your collection and single content types.
+  - Adds `_softDeletedAt`, `_softDeletedById` and `_softDeletedByType` fields to all your collection and single content types. Those fields are not visible in the Content Manager nor through the API.
 - 🗂️ Content Manager & API
-  - The normal delete functionality behaves as the soft delete. It will set the `_softDeletedAt` field to the current date, `_softDeletedById` field to the action owner id that deleted it and `_softDeletedByType` to the type of the delete action owner.
+  - The delete from the Content Manager & API behaves as the soft delete. It will set the `_softDeletedAt` field to the current date, `_softDeletedById` field to the action owner id that deleted it and `_softDeletedByType` to the type of the delete action owner.
 - 👤 RBAC
   - The `Delete` is renamed to `Soft Delete` and it is located in the `Settings > Roles > Edit a Role > Collection Types | Single Types` section.
   - A new admin permission is added to the `Settings > Roles > Edit a Role > Collection Types | Single Types` section. This is the `Deleted Read` permission. This will allow the admin role to view the soft deleted entries.
   - A new admin permission is added to the `Settings > Roles > Edit a Role > Collection Types | Single Types` section. This is the `Deleted Restore` permission. This will allow the admin role to restore the soft deleted entries.
   - A new admin permission is added to the `Settings > Roles > Edit a Role > Collection Types | Single Types` section. This is the `Delete Permanently` permission. This will allow the admin role to delete permanently the soft deleted entries.
-  - A new admin permission is added to the `Settings > Roles > Edit a Role > Plugins > Soft Delete` section. This is the global `Read` permission of the plugin. This will allow the admin role to view the Soft Delete item in the Admin left Panel. Accessing this will list all the content types the admin role have access to. They can restore or delete permanently the entries from here.
+  - A new admin permission is added to the `Settings > Roles > Edit a Role > Plugins > Soft Delete` section. This is the global `Read` permission of the plugin. This will allow the admin role to view the Soft Delete item in the Admin left Panel. Accessing this will list all the content types the admin role has access to. They can restore or delete permanently the entries from here depending on the above permissions.
 - 🗂️ Soft Delete Explorer (Admin left Panel item): Displays Soft Deleted Collection & Single Type entries 
   - ♻️ Entries can be restored with the `Restore` action. This will set the fields `_softDeletedAt`, `_softDeletedById` and `_softDeletedByType` to `null`.
     - Restoring an entry from the Soft Delete explorer will restore it to the Content Manager explorer.
       - ⚠️ Restoring a Single Type entry may replace the existing entry. This is because Single Types are unique and can only have one entry (although they're stored like collections in databse).
       - ℹ️ Restoring a Content Type entry will restore it in the Content Manager explorer without changing its fields, meaning that if the Content Type supports Draft & Publish and its publication state was published, it will be restored as published.
   - 🗑️ Entries can be permanently deleted with the `Delete Permanently` action. This will delete the entry permanently from the databse.
-
-<!-- - You can still access the content type by using the `includeSoftDeleted` query parameter. This will return all the content types including the soft deleted ones. -->
 
 ## ⛔ Permissions
 
@@ -131,23 +129,77 @@ Feel free to fork and make a PR if you want to add something or fix a bug.
   - [x] Decorate Content Type Entity Services to handle `_softDeleted*` fields when deleting an entry upon `delete` or `deleteMany` methods
   - [x] Decorate Content Type Entity Services to hide entries upon `find` or `findMany` methods
   - [x] RBAC Permissions
+  - [ ] Single Type entry restore special case
+  - [ ] Draft & Publish support when restoring an entry
+  - [ ] Custom Lifecycle Hooks
   - [ ] Handle Soft Deleting Components
+  - [ ] Add tests
 - 🗂️ Soft Delete Explorer
   - [x] Content Types list
   - [x] Entries list
   - [x] Restore action
   - [x] Delete Permanently action
+  - [ ] Translation
   - [ ] Soft Deleted Entry details
 - ⚙️ Plugin Configuration
-  - [ ] Draft & Publish support when restoring an entry
-- [ ] Single Type entry restore behavior
-- [ ] Create & Handle Translations
-- [ ] Custom Lifecycle Hooks
-- [ ] Add tests
+  - [ ] Single Type restoration behavior
+  - [ ] Draft & Publish restoration behavior
 
 ## 🚮 Uninstall
 
-<!-- FIXME: Add uninstall instructions -->
+To uninstall this plugin, you need to remove the NPM dependency from your Strapi application:
+
+```sh
+# Using Yarn
+yarn remove strapi-plugin-soft-delete
+
+# Or using PNPM
+pnpm remove strapi-plugin-soft-delete
+
+# Or using NPM
+npm uninstall strapi-plugin-soft-delete
+```
+
+Edit your `config/plugins.js|ts` or `config/<env>/plugins.js|ts` file and remove the following configuration:
+
+```js
+// ...
+  "soft-delete": {
+    enabled: true,
+  },
+// ...
+```
+
+Also, _**if you have edited your API Content Types through the Content Builder**_, and because the plugin adds fields to your it, you'll need to remove them manually. The fields are:
+- `_softDeletedAt`
+- `_softDeletedById`
+- `_softDeletedByType`
+
+Then, you'll need to build your admin panel:
+
+```sh
+# Using Yarn
+yarn build
+
+# Or using PNPM
+pnpm run build
+
+# Or using NPM
+npm run build
+```
+
+Finally, start your application:
+
+```sh
+# Using Yarn
+yarn develop
+
+# Or using PNPM
+pnpm run develop
+
+# Or using NPM
+npm run develop
+```
 
 ## 👨‍💻 Community support
 
