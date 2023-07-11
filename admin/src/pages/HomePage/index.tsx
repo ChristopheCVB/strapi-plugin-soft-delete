@@ -83,8 +83,8 @@ declare type ContentTypeNavLink = {
 
 declare type ContentTypeEntry = {
   id: number,
-  softDeletedAt: string,
-  softDeletedBy: {
+  _softDeletedAt: string,
+  _softDeletedBy: {
     type: string,
     id?: number,
     name?: string,
@@ -468,7 +468,7 @@ const HomePage: React.FunctionComponent = () => {
                         </Td>
                         <Td>
                           <Typography textColor="neutral800">
-                            {formatDate(parseISO(entry.softDeletedAt), {
+                            {formatDate(parseISO(entry._softDeletedAt), {
                               dateStyle: "full",
                               timeStyle: "short",
                             })}
@@ -476,7 +476,7 @@ const HomePage: React.FunctionComponent = () => {
                         </Td>
                         <Td>
                           <Typography textColor="neutral800">
-                            {entry.softDeletedBy?.name || entry.softDeletedBy?.id || "-"}&nbsp;({entry.softDeletedBy.type})
+                            {entry._softDeletedBy?.name || entry._softDeletedBy?.id || "-"}&nbsp;({entry._softDeletedBy.type})
                           </Typography>
                         </Td>
                         {mainField && mainField != "id" && canReadMainField && (

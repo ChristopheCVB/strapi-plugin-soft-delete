@@ -17,7 +17,7 @@ const sdWrapParams = async (defaultService: any, opts: any, ctx: { uid: string, 
           ...wrappedParams.filters
         },
         {
-          softDeletedAt: {
+          _softDeletedAt: {
             $null: true
           }
         }
@@ -89,9 +89,9 @@ export default async ({ strapi }: { strapi: Strapi & { admin: any } }) => {
         ...wrappedParams,
         data: {
           ...wrappedParams.data,
-          softDeletedAt: Date.now(),
-          softDeletedById: authId,
-          softDeletedByType: authStrategy,
+          _softDeletedAt: Date.now(),
+          _softDeletedById: authId,
+          _softDeletedByType: authStrategy,
         },
       });
     },
@@ -111,9 +111,9 @@ export default async ({ strapi }: { strapi: Strapi & { admin: any } }) => {
       for (let entityToDelete of entitiesToDelete) {
         const deletedEntity = await defaultService.update(uid, entityToDelete.id, {
           data: {
-            softDeletedAt: Date.now(),
-            softDeletedById: authId,
-            softDeletedByType: authStrategy,
+            _softDeletedAt: Date.now(),
+            _softDeletedById: authId,
+            _softDeletedByType: authStrategy,
           },
         })
         if (deletedEntity) {
@@ -135,7 +135,7 @@ export default async ({ strapi }: { strapi: Strapi & { admin: any } }) => {
         ...wrappedParams,
         filters: {
           id,
-          softDeletedAt: {
+          _softDeletedAt: {
             $null: true
           }
         }

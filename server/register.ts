@@ -8,35 +8,35 @@ export default ({ strapi }: { strapi: Strapi }) => {
   ) {
     const [uid, contentType] = contentTypeRecord as [uid: string, type: any];
     if (uidMatcher(uid)) {
-      const softDeletedAt = {
+      const _softDeletedAt = {
         type: "datetime",
         configurable: false,
         writable: false,
         visible: false,
         private: true,
       };
-      contentType.attributes.softDeletedAt = softDeletedAt;
-      contentType.__schema__.attributes.softDeletedAt = softDeletedAt;
+      contentType.attributes._softDeletedAt = _softDeletedAt;
+      contentType.__schema__.attributes._softDeletedAt = _softDeletedAt;
 
-      const softDeletedById = {
+      const _softDeletedById = {
         type: "integer",
         configurable: false,
         writable: false,
         visible: false,
         private: true,
       };
-      contentType.attributes.softDeletedById = softDeletedById;
-      contentType.__schema__.attributes.softDeletedById = softDeletedById;
+      contentType.attributes._softDeletedById = _softDeletedById;
+      contentType.__schema__.attributes._softDeletedById = _softDeletedById;
 
-      const softDeletedByType = {
+      const _softDeletedByType = {
         type: "string",
         configurable: false,
         writable: false,
         visible: false,
         private: true,
       };
-      contentType.attributes.softDeletedByType = softDeletedByType;
-      contentType.__schema__.attributes.softDeletedByType = softDeletedByType;
+      contentType.attributes._softDeletedByType = _softDeletedByType;
+      contentType.__schema__.attributes._softDeletedByType = _softDeletedByType;
     }
   }
 };

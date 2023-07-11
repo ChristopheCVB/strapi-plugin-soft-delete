@@ -8,36 +8,36 @@ declare type SoftDeletedBy = {
 
 export default ({ strapi }: { strapi: Strapi }) => ({
   getSoftDeletedBy: async (entry: any) => {
-    const softDeletedBy: SoftDeletedBy = {
-      id: entry.softDeletedById,
-      type: entry.softDeletedByType,
+    const _softDeletedBy: SoftDeletedBy = {
+      id: entry._softDeletedById,
+      type: entry._softDeletedByType,
     }
-    if (entry.softDeletedById && entry.softDeletedByType) {
+    if (entry._softDeletedById && entry._softDeletedByType) {
       try {
-        switch (entry.softDeletedByType) {
+        switch (entry._softDeletedByType) {
           case 'admin':
-            const adminUser = await strapi.entityService.findOne('admin::user', entry.softDeletedById)
-            softDeletedBy.name = adminUser.username;
+            const adminUser = await strapi.entityService.findOne('admin::user', entry._softDeletedById)
+            _softDeletedBy.name = adminUser.username;
             break;
 
           case 'api-token':
-            const apiToken = await strapi.entityService.findOne('admin::api-token', entry.softDeletedById);
-            softDeletedBy.name = apiToken.name;
+            const apiToken = await strapi.entityService.findOne('admin::api-token', entry._softDeletedById);
+            _softDeletedBy.name = apiToken.name;
             break;
 
           case 'transfer-token':
-            const transferToken = await strapi.entityService.findOne('admin::transfer-token', entry.softDeletedById);
-            softDeletedBy.name = transferToken.name;
+            const transferToken = await strapi.entityService.findOne('admin::transfer-token', entry._softDeletedById);
+            _softDeletedBy.name = transferToken.name;
             break;
 
           case 'users-premissions':
-            const user = await strapi.entityService.findOne('plugin::users-permissions.user', entry.softDeletedById);
-            softDeletedBy.name = user.username || user.email || user.id;
+            const user = await strapi.entityService.findOne('plugin::users-permissions.user', entry._softDeletedById);
+            _softDeletedBy.name = user.username || user.email || user.id;
             break;
         }
       } catch (error) {}
     }
-    return softDeletedBy;
+    return _softDeletedBy;
   },
 
   async findOne(ctx) {
@@ -45,7 +45,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       select: '*',
       where: {
         id: ctx.params.id,
-        softDeletedAt: {
+        _softDeletedAt: {
           $ne: null,
         },
       },
@@ -53,7 +53,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
 
     return {
       ...entity,
-      softDeletedBy: await this.getSoftDeletedBy(entity),
+      _softDeletedBy: await this.getSoftDeletedBy(entity),
     }
   },
 
@@ -61,17 +61,17 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     return await Promise.all((await strapi.query(ctx.params.uid).findMany({
       select: '*',
       where: {
-        softDeletedAt: {
+        _softDeletedAt: {
           $ne: null,
         },
       },
       orderBy: {
-        softDeletedAt: 'desc',
+        _softDeletedAt: 'desc',
       },
     })).map(async (entry) => {
       return {
         ...entry,
-        softDeletedBy: await this.getSoftDeletedBy(entry),
+        _softDeletedBy: await this.getSoftDeletedBy(entry),
       }
     }));
   },
@@ -94,9 +94,9 @@ export default ({ strapi }: { strapi: Strapi }) => ({
         id: ctx.params.id,
       },
       data: {
-        softDeletedAt: null,
-        softDeletedById: null,
-        softDeletedByType: null,
+        _softDeletedAt: null,
+        _softDeletedById: null,
+        _softDeletedByType: null,
       },
     });
   },
@@ -119,9 +119,9 @@ export default ({ strapi }: { strapi: Strapi }) => ({
         id: ctx.request.body.data.ids,
       },
       data: {
-        softDeletedAt: null,
-        softDeletedById: null,
-        softDeletedByType: null,
+        _softDeletedAt: null,
+        _softDeletedById: null,
+        _softDeletedByType: null,
       },
     });
   },
