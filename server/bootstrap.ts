@@ -90,9 +90,8 @@ export default async ({ strapi }: { strapi: Strapi & { admin: any } }) => {
         data: {
           ...wrappedParams.data,
           softDeletedAt: Date.now(),
-          softDeletedBy: authId ? [authId] : null, // FIXME: Replace softDeletedBy by softDeletedById and softDeletedByType
-          // softDeletedById: authId,// FIXME: softDeletedById
-          // softDeletedByType: authStrategy, // FIXME: softDeletedByType
+          softDeletedById: authId,
+          softDeletedByType: authStrategy,
         },
       });
     },
@@ -113,9 +112,8 @@ export default async ({ strapi }: { strapi: Strapi & { admin: any } }) => {
         const deletedEntity = await defaultService.update(uid, entityToDelete.id, {
           data: {
             softDeletedAt: Date.now(),
-            softDeletedBy: authId ? [authId] : null, // FIXME: Replace softDeletedBy by softDeletedById and softDeletedByType
-            // softDeletedById: userId,// FIXME: softDeletedById
-            // softDeletedByType: authStrategy, // FIXME: softDeletedByType
+            softDeletedById: authId,
+            softDeletedByType: authStrategy,
           },
         })
         if (deletedEntity) {

@@ -1,8 +1,47 @@
 import { Strapi } from '@strapi/strapi';
 
+declare type SoftDeletedBy = {
+  id?: number;
+  type: string;
+  name?: string;
+}
+
 export default ({ strapi }: { strapi: Strapi }) => ({
-  findOne(ctx) {
-    return strapi.query(ctx.params.uid).findOne({
+  getSoftDeletedBy: async (entry: any) => {
+    const softDeletedBy: SoftDeletedBy = {
+      id: entry.softDeletedById,
+      type: entry.softDeletedByType,
+    }
+    if (entry.softDeletedById && entry.softDeletedByType) {
+      try {
+        switch (entry.softDeletedByType) {
+          case 'admin':
+            const adminUser = await strapi.entityService.findOne('admin::user', entry.softDeletedById)
+            softDeletedBy.name = adminUser.username;
+            break;
+
+          case 'api-token':
+            const apiToken = await strapi.entityService.findOne('admin::api-token', entry.softDeletedById);
+            softDeletedBy.name = apiToken.name;
+            break;
+
+          case 'transfer-token':
+            const transferToken = await strapi.entityService.findOne('admin::transfer-token', entry.softDeletedById);
+            softDeletedBy.name = transferToken.name;
+            break;
+
+          case 'users-premissions':
+            const user = await strapi.entityService.findOne('plugin::users-permissions.user', entry.softDeletedById);
+            softDeletedBy.name = user.username || user.email || user.id;
+            break;
+        }
+      } catch (error) {}
+    }
+    return softDeletedBy;
+  },
+
+  async findOne(ctx) {
+    const entity = await strapi.query(ctx.params.uid).findOne({
       select: '*',
       where: {
         id: ctx.params.id,
@@ -10,12 +49,16 @@ export default ({ strapi }: { strapi: Strapi }) => ({
           $ne: null,
         },
       },
-      populate: ['softDeletedBy']
     });
+
+    return {
+      ...entity,
+      softDeletedBy: await this.getSoftDeletedBy(entity),
+    }
   },
 
-  findMany(ctx) {
-    return strapi.query(ctx.params.uid).findMany({
+  async findMany(ctx) {
+    return await Promise.all((await strapi.query(ctx.params.uid).findMany({
       select: '*',
       where: {
         softDeletedAt: {
@@ -25,8 +68,12 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       orderBy: {
         softDeletedAt: 'desc',
       },
-      populate: ['softDeletedBy']
-    });
+    })).map(async (entry) => {
+      return {
+        ...entry,
+        softDeletedBy: await this.getSoftDeletedBy(entry),
+      }
+    }));
   },
 
   delete(ctx) {
@@ -39,7 +86,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
   },
 
   restore(ctx) {
-    // TODO: Handle ctx.params.kind === singleType
+    // FIXME: Handle ctx.params.kind === singleType
     // TODO: Handle publicationState
     return strapi.query(ctx.params.uid).update({
       select: '*',
@@ -48,7 +95,8 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       },
       data: {
         softDeletedAt: null,
-        softDeletedBy: null,
+        softDeletedById: null,
+        softDeletedByType: null,
       },
     });
   },
@@ -63,7 +111,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
   },
 
   restoreMany(ctx) {
-    // TODO: Handle ctx.params.kind === singleType
+    // FIXME: Handle ctx.params.kind === singleType
     // TODO: Handle publicationState
     return strapi.query(ctx.params.uid).updateMany({
       select: '*',
@@ -72,9 +120,9 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       },
       data: {
         softDeletedAt: null,
-        softDeletedBy: null,
+        softDeletedById: null,
+        softDeletedByType: null,
       },
     });
   },
-
 });

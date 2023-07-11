@@ -1,39 +1,39 @@
 import { Strapi } from '@strapi/strapi';
 
 export default ({ strapi }: { strapi: Strapi }) => ({
-  findOne(ctx) {
+  async findOne(ctx) {
     const service = strapi.plugin('soft-delete').service('service');
 
-    return service.findOne(ctx);
+    return await service.findOne(ctx);
   },
 
-  findMany(ctx) {
+  async findMany(ctx) {
     const service = strapi.plugin('soft-delete').service('service');
 
-    return service.findMany(ctx);
+    return await service.findMany(ctx);
   },
 
-  delete(ctx) {
+  async delete(ctx) {
     const service = strapi.plugin('soft-delete').service('service');
 
-    return service.delete(ctx);
+    return await service.delete(ctx);
   },
 
-  restore(ctx) {
+  async restore(ctx) {
     const service = strapi.plugin('soft-delete').service('service');
 
-    return service.restore(ctx);
+    return await service.restore(ctx);
   },
 
-  deleteMany(ctx) {
+  async deleteMany(ctx) {
     const service = strapi.plugin('soft-delete').service('service');
 
-    return service.deleteMany(ctx);
+    return await service.deleteMany(ctx);
   },
 
-  restoreMany(ctx) {
+  async restoreMany(ctx) {
     const service = strapi.plugin('soft-delete').service('service');
 
-    return service.restoreMany(ctx);
+    return await service.restoreMany(ctx);
   },
 });

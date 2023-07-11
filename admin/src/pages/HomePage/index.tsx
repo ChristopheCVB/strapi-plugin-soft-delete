@@ -85,9 +85,10 @@ declare type ContentTypeEntry = {
   id: number,
   softDeletedAt: string,
   softDeletedBy: {
-    username: string,
-    email: string,
-  }[],
+    type: string,
+    id?: number,
+    name?: string,
+  },
   [mainField: string]: unknown,
 };
 
@@ -475,9 +476,7 @@ const HomePage: React.FunctionComponent = () => {
                         </Td>
                         <Td>
                           <Typography textColor="neutral800">
-                            {entry.softDeletedBy[0]?.username ||
-                              entry.softDeletedBy[0]?.email ||
-                              "-"}
+                            {entry.softDeletedBy?.name || entry.softDeletedBy?.id || "-"}&nbsp;({entry.softDeletedBy.type})
                           </Typography>
                         </Td>
                         {mainField && mainField != "id" && canReadMainField && (

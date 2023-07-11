@@ -37,7 +37,7 @@ A plugin for [Strapi Headless CMS](https://github.com/strapi/strapi) that provid
   - ♻️ Entries can be restored with the `Restore` action. This will set the `softDeletedAt` field to `null` and `softDeletedBy` field to `null`.
     - Restoring an entry from the Soft Delete explorer will restore it to the Content Manager explorer.
       - ⚠️ Restoring a Single Type entry may replace the existing entry. This is because Single Types are unique and can only have one entry (although they're stored like collections in databse).
-      - ℹ️ Restoring a Collection Type entry will restore it in the Content Manager explorer without changing its fields, meaning that if the Content Type supports Draft & Publish and its publication state was published, it will be restored as published.
+      - ℹ️ Restoring a Content Type entry will restore it in the Content Manager explorer without changing its fields, meaning that if the Content Type supports Draft & Publish and its publication state was published, it will be restored as published.
   - 🗑️ Entries can be permanently deleted with the `Delete Permanently` action. This will delete the entry permanently from the databse.
 
 <!-- - You can still access the content type by using the `includeSoftDeleted` query parameter. This will return all the content types including the soft deleted ones. -->
@@ -59,6 +59,13 @@ A plugin for [Strapi Headless CMS](https://github.com/strapi/strapi) that provid
 | v3             | Not Supported  |
 
 > This plugin is designed for **Strapi v4** and will not work with v3.x.
+
+## 🚨 Caveats
+
+Because of the way the plugin handles soft deleted entries, there are some caveats to be aware of:
+- Lifecycle hooks:
+  - `beforeDelete`, `afterDelete`, `beforeDeleteMany` and `afterDeleteMany` lifecycle hooks are not triggered when soft deleting entries. Instead, the `beforeUpdate`, `afterUpdate`, `beforeUpdateMany` and `afterUpdateMany` are. <!-- Instead, the new `beforeSoftDelete`, `afterSoftDelete`, `beforeSoftDeleteMany` and `afterSoftDeleteMany` lifecycle hooks are triggered. --><!-- TODO: Is it possible to create custom lifecyle hooks? Maybe by wrapping https://github.com/strapi/strapi/blob/40b3acfe6f9bb9ff73dfba951090731879b87ec5/packages/core/strapi/lib/services/event-hub.js#L22 -->
+  - `beforeDelete`, `afterDelete`, `beforeDeleteMany` and `afterDeleteMany` lifecycle hooks are triggered when deleting permanently an entries.
 
 ## ⏳ Installation
 
@@ -124,9 +131,6 @@ Feel free to fork and make a PR if you want to add something or fix a bug.
   - [x] Decorate Content Type Entity Services to handle `softDeleted*` fields when deleting an entry upon `delete` or `deleteMany` methods
   - [x] Decorate Content Type Entity Services to hide entries upon `find` or `findMany` methods
   - [x] RBAC Permissions
-  - ⚙️ Plugin Configuration
-    - [ ] Draft & Publish support when restoring an entry
-    - [ ] Single Type entry restore behavior
   - [ ] Handle Soft Deleting Components
 - 🗂️ Soft Delete Explorer
   - [x] Content Types list
@@ -134,8 +138,16 @@ Feel free to fork and make a PR if you want to add something or fix a bug.
   - [x] Restore action
   - [x] Delete Permanently action
   - [ ] Soft Deleted Entry details
+- ⚙️ Plugin Configuration
+  - [ ] Draft & Publish support when restoring an entry
+- [ ] Single Type entry restore behavior
 - [ ] Create & Handle Translations
+- [ ] Custom Lifecycle Hooks
 - [ ] Add tests
+
+## 🚮 Uninstall
+
+<!-- FIXME: Add uninstall instructions -->
 
 ## 👨‍💻 Community support
 

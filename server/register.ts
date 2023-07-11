@@ -18,39 +18,25 @@ export default ({ strapi }: { strapi: Strapi }) => {
       contentType.attributes.softDeletedAt = softDeletedAt;
       contentType.__schema__.attributes.softDeletedAt = softDeletedAt;
 
-      const softDeletedBy = { // FIXME: replace with softDeletedById and softDeletedByType
-        type: "relation",
-        relation: "oneToMany",
-        target: "admin::user",
+      const softDeletedById = {
+        type: "integer",
         configurable: false,
         writable: false,
         visible: false,
         private: true,
       };
-      contentType.attributes.softDeletedBy = softDeletedBy;
-      contentType.__schema__.attributes.softDeletedBy = softDeletedBy;
+      contentType.attributes.softDeletedById = softDeletedById;
+      contentType.__schema__.attributes.softDeletedById = softDeletedById;
 
-      // const softDeletedById = { // FIXME: softDeletedById
-      //   type: "biginteger",
-      //   configurable: false,
-      //   writable: false,
-      //   visible: false,
-      //   private: true,
-      // };
-      // contentType.attributes.softDeletedById = softDeletedById;
-      // contentType.__schema__.attributes.softDeletedById = softDeletedById;
-
-      // const softDeletedByType = { // FIXME: softDeletedByType
-      //   type: "string",
-      //   configurable: false,
-      //   writable: false,
-      //   visible: false,
-      //   private: true,
-      // };
-      // contentType.attributes.softDeletedById = softDeletedByType;
-      // contentType.__schema__.attributes.softDeletedById = softDeletedByType;
-
-      // FIXME: softDeletedByType
+      const softDeletedByType = {
+        type: "string",
+        configurable: false,
+        writable: false,
+        visible: false,
+        private: true,
+      };
+      contentType.attributes.softDeletedByType = softDeletedByType;
+      contentType.__schema__.attributes.softDeletedByType = softDeletedByType;
     }
   }
 };
