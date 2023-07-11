@@ -134,6 +134,7 @@ Feel free to fork and make a PR if you want to add something or fix a bug.
   - [x] Restore action
   - [x] Delete Permanently action
   - [ ] Soft Deleted Entry details
+- [ ] Create & Handle Translations
 - [ ] Add tests
 
 ## 👨‍💻 Community support
