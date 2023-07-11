@@ -1,6 +1,7 @@
 ---
 name: 🐛 Bug Report
 about: Create a report to help us improve Strapi Plugin Soft Delete.
+labels: bug
 ---
 
 <!--
