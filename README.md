@@ -129,6 +129,7 @@ Feel free to fork and make a PR if you want to add something or fix a bug.
   - [x] Decorate Content Type Entity Services to handle `_softDeleted*` fields when deleting an entry upon `delete` or `deleteMany` methods
   - [x] Decorate Content Type Entity Services to hide entries upon `find` or `findMany` methods
   - [x] RBAC Permissions
+  - [x] Admin Routes
   - [ ] Single Type entry restore special case
   - [ ] Draft & Publish support when restoring an entry
   - [ ] Custom Lifecycle Hooks
@@ -142,7 +143,7 @@ Feel free to fork and make a PR if you want to add something or fix a bug.
   - [x] Translation
   - [ ] Soft Deleted Entry details
 - ⚙️ Plugin Settings
-  - [-] Restoration Behavior
+  - [x] Restoration Behavior
     - [ ] Single Type
     - [ ] Draft & Publish
 

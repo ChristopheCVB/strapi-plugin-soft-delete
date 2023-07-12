@@ -35,6 +35,7 @@ import {
   ModalFooter,
   Button,
   Loader,
+  Alert,
 } from '@strapi/design-system';
 import { Trash, ArrowLeft, Refresh, EmptyDocuments, EmptyPermissions } from '@strapi/icons';
 
@@ -56,11 +57,11 @@ const ContentTypeEntries: React.FunctionComponent<Props> = ({contentType}) => {
   const [selectedEntriesId, setSelectedEntriesId] = useState<number[]>([]);
 
   const canRestore = allPermissions.some(permission =>
-    permission.action === 'plugin::soft-delete.explorer.restore' &&
+    permission.action === `plugin::${pluginId}.explorer.restore` &&
     permission.subject === contentType?.uid
   );
   const canDeletePermanantly = allPermissions.some(permission =>
-    permission.action === 'plugin::soft-delete.explorer.delete-permanently' &&
+    permission.action === `plugin::${pluginId}.explorer.delete-permanently` &&
     permission.subject === contentType?.uid
   );
   const canReadMainField = mainField && allPermissions.some(permission =>
@@ -99,9 +100,11 @@ const ContentTypeEntries: React.FunctionComponent<Props> = ({contentType}) => {
 
   const [restoreModalEntriesId, setRestoreModalEntriesId] = useState<number[]>([]);
   const [isRestoring, setIsRestoring] = useState<boolean>(false);
+  const [restoreResult, setRestoreResult] = useState<Error | true | undefined>(undefined);
   const confirmRestore = () => {
     if (isRestoring) return;
 
+    setRestoreResult(undefined);
     setIsRestoring(true);
     put(`/${pluginId}/${contentType?.kind}/${contentType?.uid}/restore`, {
       data: {
@@ -111,21 +114,27 @@ const ContentTypeEntries: React.FunctionComponent<Props> = ({contentType}) => {
       .then(() => {
         setEntries(entries.filter(entry => !restoreModalEntriesId.includes(entry.id)));
         setSelectedEntriesId([]);
+        setRestoreResult(true);
       })
       .catch((error: Error) => {
-        console.log(error); // TODO: Show Restore error
+        setRestoreResult(error);
       })
       .finally(() => {
         setRestoreModalEntriesId([]);
         setIsRestoring(false);
+        setTimeout(() => {
+          setRestoreResult(undefined);
+        }, 3000);
       });
   };
 
   const [deletePermanentlyModalEntriesId, setDeletePermanentlyModalEntriesId] = useState<number[]>([]);
   const [isDeletingPermanently, setIsDeletingPermanently] = useState<boolean>(false);
+  const [deletePermanentlyResult, setDeletePermanentlyResult] = useState<Error | true | undefined>(undefined);
   const confirmDeletePermanently = () => {
     if (isDeletingPermanently) return;
 
+    setDeletePermanentlyResult(undefined);
     setIsDeletingPermanently(true);
     put(`/${pluginId}/${contentType?.kind}/${contentType?.uid}/delete`, {
       data: {
@@ -135,13 +144,17 @@ const ContentTypeEntries: React.FunctionComponent<Props> = ({contentType}) => {
       .then(() => {
         setEntries(entries.filter(entry => !deletePermanentlyModalEntriesId.includes(entry.id)));
         setSelectedEntriesId([]);
+        setDeletePermanentlyResult(true);
       })
       .catch((error: Error) => {
-        console.log(error); // TODO: Show Delete Permanently error
+        setDeletePermanentlyResult(error);
       })
       .finally(() => {
         setDeletePermanentlyModalEntriesId([]);
         setIsDeletingPermanently(false);
+        setTimeout(() => {
+          setDeletePermanentlyResult(undefined);
+        }, 3000);
       });
   };
 
@@ -362,7 +375,7 @@ const ContentTypeEntries: React.FunctionComponent<Props> = ({contentType}) => {
         >
           <EmptyPermissions width="10rem" height="5.5rem" />
           <Typography variant="delta" textColor="neutral600">
-            {formatMessage({id: getTrad('explorer.noPermissions'), defaultMessage: 'You don\'t have permissions to access that content'})}
+            {formatMessage({id: getTrad('explorer.noContentTypeSelected'), defaultMessage: 'No type selected'})}
           </Typography>
         </Flex>
       )}
@@ -456,6 +469,32 @@ const ContentTypeEntries: React.FunctionComponent<Props> = ({contentType}) => {
           />
         </ModalLayout>
       )) || <></>}
+      {(restoreResult && <Alert
+        position="fixed"
+        top="5%"
+        left="40%"
+        zIndex="100"
+        variant={restoreResult === true ? 'success' : 'danger'}
+        onClose={() => setRestoreResult(undefined)}
+      >
+        {restoreResult === true ?
+          formatMessage({id: getTrad('explorer.restore.success'), defaultMessage: 'Entries restored successfully'}) :
+          formatMessage({id: getTrad('explorer.restore.error'), defaultMessage: 'Error restoring entries'})
+        }
+      </Alert>) || <></>}
+      {(deletePermanentlyResult && <Alert
+        position="fixed"
+        top="5%"
+        left="40%"
+        zIndex="100"
+        variant={deletePermanentlyResult === true ? 'success' : 'danger'}
+        onClose={() => setDeletePermanentlyResult(undefined)}
+      >
+        {deletePermanentlyResult === true ?
+          formatMessage({id: getTrad('explorer.deletePermanently.success'), defaultMessage: 'Entries deleted permanently successfully'}) :
+          formatMessage({id: getTrad('explorer.deletePermanently.error'), defaultMessage: 'Error deleting entries permanently'})
+        }
+      </Alert>) || <></>}
     </>
   );
 }

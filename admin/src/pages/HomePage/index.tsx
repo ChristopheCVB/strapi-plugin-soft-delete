@@ -68,7 +68,7 @@ const HomePage: React.FunctionComponent = () => {
           // Filter out content types that the user doesn't have the permission to access
           .filter(contentType =>
             allPermissions.some(permission =>
-              permission.action === 'plugin::soft-delete.explorer.read' &&
+              permission.action === `plugin::${pluginId}.explorer.read` &&
               permission.subject === contentType.uid
             )
           )
@@ -89,7 +89,7 @@ const HomePage: React.FunctionComponent = () => {
           // Filter out content types that the user doesn't have the permission to access
           .filter(contentType =>
             allPermissions.some(permission =>
-              permission.action === 'plugin::soft-delete.explorer.read' &&
+              permission.action === `plugin::${pluginId}.explorer.read` &&
               permission.subject === contentType.uid
             )
           )

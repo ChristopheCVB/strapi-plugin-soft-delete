@@ -7,18 +7,19 @@
 
 import React from 'react';
 import { Switch, Route } from 'react-router-dom';
-import { AnErrorOccurred } from '@strapi/helper-plugin';
+import { AnErrorOccurred, CheckPagePermissions } from '@strapi/helper-plugin';
 import { pluginId } from '../../../../utils/plugin';
+import permissions from '../../permissions';
 import HomePage from '../HomePage';
 
 const App = () => {
   return (
-    <div>
+    <CheckPagePermissions permissions={permissions.main}>
       <Switch>
         <Route path={`/plugins/${pluginId}/:kind?/:uid?`} component={HomePage} exact />
         <Route component={AnErrorOccurred} />
       </Switch>
-    </div>
+    </CheckPagePermissions>
   );
 };
 

@@ -3,6 +3,7 @@ import { pluginId, name } from '../../utils/plugin';
 import Initializer from './components/Initializer';
 import PluginIcon from './components/PluginIcon';
 import getTrad from './utils/getTrad';
+import permissions from './permissions';
 
 export default {
   register(app: any) {
@@ -18,12 +19,7 @@ export default {
 
         return component;
       },
-      permissions: [
-        {
-          action: 'plugin::soft-delete.read',
-          subject: null,
-        },
-      ],
+      permissions: permissions.main,
     });
 
     app.createSettingSection(
@@ -38,7 +34,7 @@ export default {
 
             return component;
           },
-          permissions: [ { action: 'admin::project-settings.update', subject: null } ], // FIXME: IDK if this is correct or if I should create a new permission
+          permissions: permissions.settings,
         },
       ],
     );
