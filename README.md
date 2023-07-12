@@ -26,7 +26,7 @@ A plugin for [Strapi Headless CMS](https://github.com/strapi/strapi) that provid
 - 🛢 Database
   - Adds `_softDeletedAt`, `_softDeletedById` and `_softDeletedByType` fields to all your collection and single content types. Those fields are not visible in the Content Manager nor through the API.
 - 🗂️ Content Manager & API
-  - The delete from the Content Manager & API behaves as the soft delete. It will set the `_softDeletedAt` field to the current date, `_softDeletedById` field to the action owner id that deleted it and `_softDeletedByType` to the type of the delete action owner.
+  - The delete from the Content Manager & API behaves as a soft delete. It will set `_softDeletedAt` to the current datetime, `_softDeletedById` to the action initiator id that deleted it and `_softDeletedByType` to the type of the delete action initiator.
 - 👤 RBAC
   - The `Delete` is renamed to `Soft Delete` and it is located in the `Settings > Roles > Edit a Role > Collection Types | Single Types` section.
   - A new admin permission is added to the `Settings > Roles > Edit a Role > Collection Types | Single Types` section. This is the `Deleted Read` permission. This will allow the admin role to view the soft deleted entries.
