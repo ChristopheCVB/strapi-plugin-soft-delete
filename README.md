@@ -171,7 +171,7 @@ Edit your `config/plugins.js|ts` or `config/<env>/plugins.js|ts` file and remove
 // ...
 ```
 
-Also, _**if you have edited your API Content Types through the Content Builder**_, and because the plugin adds fields to your it, you'll need to remove them manually. The fields are:
+Also, _**if you have edited your API Content Types through the Content Builder**_, and because the plugin adds fields to it, you'll need to remove them manually. The fields are:
 - `_softDeletedAt`
 - `_softDeletedById`
 - `_softDeletedByType`
