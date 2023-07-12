@@ -7,6 +7,6 @@
 import React from 'react';
 import { Trash } from '@strapi/icons';
 
-const PluginIcon: React.VoidFunctionComponent = () => <Trash />;
+const PluginIcon: React.FunctionComponent = () => <Trash />;
 
 export default PluginIcon;

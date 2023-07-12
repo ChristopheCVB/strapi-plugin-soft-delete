@@ -45,6 +45,8 @@ import { useIntl } from 'react-intl';
 
 import { useRBACProvider } from '@strapi/helper-plugin';
 
+import getTrad from '../../utils/getTrad';
+
 declare type ContentManagerInitResponse = {
   data: {
     data: {
@@ -101,7 +103,7 @@ declare type Permission = {
 };
 
 const HomePage: React.FunctionComponent = () => {
-  const { formatDate } = useIntl();
+  const { formatDate, formatMessage } = useIntl();
   const params: { kind: string, uid: string } = useParams();
   const history = useHistory();
   const [search, setSearch] = useState(''); // TODO: Implement Content Type search
@@ -288,12 +290,12 @@ const HomePage: React.FunctionComponent = () => {
               value={search}
               onClear={() => setSearch("")}
               onChange={(e: any) => setSearch(e.target.value)}
-              label="Soft Delete"
+              label={formatMessage({id: getTrad('name'), defaultMessage: 'Soft Delete'})}
               searchLabel="Search..."
             />
             <SubNavSections>
               <SubNavSection
-                label="Collection Type"
+                label={formatMessage({id: getTrad('explorer.collectionTypes'), defaultMessage: 'Collection Types'})}
                 collapsable
                 badgeLabel={contentTypeNavLinks
                   .filter(
@@ -318,7 +320,7 @@ const HomePage: React.FunctionComponent = () => {
                   ))}
               </SubNavSection>
               <SubNavSection
-                label="Single Type"
+                label={formatMessage({id: getTrad('explorer.singleTypes'), defaultMessage: 'Single Types'})}
                 collapsable
                 badgeLabel={contentTypeNavLinks
                   .filter(
@@ -351,11 +353,11 @@ const HomePage: React.FunctionComponent = () => {
             <BaseHeaderLayout
               navigationAction={
                 <Link startIcon={<ArrowLeft />} to={`/plugins/${pluginId}`}>
-                  Go back
+                  {formatMessage({id: getTrad('back'), defaultMessage: 'Back'})}
                 </Link>
               }
               title={activeContentType?.label || ""}
-              subtitle={entries.length + " entries found"}
+              subtitle={formatMessage({id: getTrad('explorer.countEntriesFound'), defaultMessage: `${entries.length} entries found`}, { count: entries.length })}
               as="h2"
             />
           )}
@@ -398,10 +400,12 @@ const HomePage: React.FunctionComponent = () => {
                       <Typography variant="sigma">ID</Typography>
                     </Th>
                     <Th>
-                      <Typography variant="sigma">SoftDeletedAt</Typography>
+                      <Typography variant="sigma">
+                        {formatMessage({id: getTrad('explorer.softDeletedAt'), defaultMessage: 'Soft Deleted At'})}
+                      </Typography>
                     </Th>
                     <Th>
-                      <Typography variant="sigma">SoftDeletedBy</Typography>
+                      <Typography variant="sigma">{formatMessage({id: getTrad('explorer.softDeletedBy'), defaultMessage: 'Soft Deleted By'})}</Typography>
                     </Th>
                     {mainField && mainField != "id" && canReadMainField && (
                       <Th>
@@ -417,7 +421,7 @@ const HomePage: React.FunctionComponent = () => {
                                 setDeletePermanentlyModalEntriesId([]);
                                 setRestoreModalEntriesId(selectedEntriesId);
                               }}
-                              label="Restore"
+                              label={formatMessage({id: getTrad('explorer.restore'), defaultMessage: 'Restore'})}
                               icon={<Refresh />}
                             />
                           )}
@@ -429,12 +433,12 @@ const HomePage: React.FunctionComponent = () => {
                                   selectedEntriesId
                                 );
                               }}
-                              label="Delete Permanently"
+                              label={formatMessage({id: getTrad('explorer.deletePermanently'), defaultMessage: 'Delete Permanently'})}
                               icon={<Trash />}
                             />
                           )}
                         </Flex>
-                      )) || <VisuallyHidden>Actions</VisuallyHidden>}
+                      )) || <VisuallyHidden>{formatMessage({id: getTrad('explorer.actions'), defaultMessage: 'Actions'})}</VisuallyHidden>}
                     </Th>
                   </Tr>
                 </Thead>
@@ -494,7 +498,7 @@ const HomePage: React.FunctionComponent = () => {
                                   setDeletePermanentlyModalEntriesId([]);
                                   setRestoreModalEntriesId([entry.id]);
                                 }}
-                                label="Restore"
+                                label={formatMessage({id: getTrad('explorer.restore'), defaultMessage: 'Restore'})}
                                 icon={<Refresh />}
                               />
                             )}
@@ -506,7 +510,7 @@ const HomePage: React.FunctionComponent = () => {
                                     entry.id,
                                   ]);
                                 }}
-                                label="Delete Permanently"
+                                label={formatMessage({id: getTrad('explorer.deletePermanently'), defaultMessage: 'Delete Permanently'})}
                                 icon={<Trash />}
                               />
                             )}
@@ -519,7 +523,7 @@ const HomePage: React.FunctionComponent = () => {
                         <Flex direction="column" gap="6" padding="4rem">
                           <EmptyDocuments width="10rem" height="5.5rem" />
                           <Typography variant="delta" textColor="neutral600">
-                            No entries found
+                            {formatMessage({id: getTrad('explorer.noEntriesFound'), defaultMessage: 'No entries found'})}
                           </Typography>
                         </Flex>
                       </Td>
@@ -543,7 +547,7 @@ const HomePage: React.FunctionComponent = () => {
               height="100%"
             >
               <Typography variant="delta" textColor="neutral600">
-                Error loading entries
+                {formatMessage({id: getTrad('explorer.errorLoadingEntries'), defaultMessage: 'Error loading entries'})}
               </Typography>
               <Typography variant="delta" textColor="neutral600">
                 {loadingError.message}
@@ -560,7 +564,7 @@ const HomePage: React.FunctionComponent = () => {
             >
               <EmptyPermissions width="10rem" height="5.5rem" />
               <Typography variant="delta" textColor="neutral600">
-                You don't have the permissions to access that content
+                {formatMessage({id: getTrad('explorer.noPermissions'), defaultMessage: 'You don\'t have permissions to access that content'})}
               </Typography>
             </Flex>
           )}
@@ -578,25 +582,17 @@ const HomePage: React.FunctionComponent = () => {
               as="h2"
               id="title"
             >
-              Confirm Restore
+              {formatMessage({id: getTrad('explorer.confirmation.restore.title'), defaultMessage: 'Confirm Restoration'})}
             </Typography>
           </ModalHeader>
           <ModalBody>
             {(isRestoring && <Loader width="10rem" height="10rem" /> && (
               <Typography textColor="neutral800">
-                Restoring{" "}
-                {restoreModalEntriesId.length > 1
-                  ? `${restoreModalEntriesId.length} entries`
-                  : "one entry"}
-                ?
+                {formatMessage({id: getTrad('explorer.confirmation.restore.doing'), defaultMessage: 'Restoring'})}
               </Typography>
             )) || (
               <Typography textColor="neutral800">
-                Are you sure you want to restore{" "}
-                {restoreModalEntriesId.length > 1
-                  ? `${restoreModalEntriesId.length} entries`
-                  : "one entry"}
-                ?
+                {formatMessage({id: getTrad('explorer.confirmation.restore.description'), defaultMessage: 'Are you sure you want to restore this?'})}
               </Typography>
             )}
           </ModalBody>
@@ -607,7 +603,7 @@ const HomePage: React.FunctionComponent = () => {
                 onClick={() => setRestoreModalEntriesId([])}
                 disabled={isRestoring}
               >
-                Cancel
+                {formatMessage({id: getTrad('cancel'), defaultMessage: 'Cancel'})}
               </Button>
             }
             endActions={
@@ -616,7 +612,7 @@ const HomePage: React.FunctionComponent = () => {
                 onClick={confirmRestore}
                 disabled={isRestoring}
               >
-                Yes
+                {formatMessage({id: getTrad('confirm'), defaultMessage: 'Confirm'})}
               </Button>
             }
           />
@@ -638,7 +634,7 @@ const HomePage: React.FunctionComponent = () => {
               as="h2"
               id="title"
             >
-              Confirm Delete Permanently
+              {formatMessage({id: getTrad('explorer.confirmation.deletePermanently.title'), defaultMessage: 'Confirm Delete Permanently'})}
             </Typography>
           </ModalHeader>
           <ModalBody>
@@ -646,19 +642,11 @@ const HomePage: React.FunctionComponent = () => {
                 <Loader width="10rem" height="10rem" />
               ) && (
                 <Typography textColor="neutral800">
-                  Restoring{" "}
-                  {deletePermanentlyModalEntriesId.length > 1
-                    ? `${deletePermanentlyModalEntriesId.length} entries`
-                    : "one entry"}
-                  ?
+                  {formatMessage({id: getTrad('explorer.confirmation.deletePermanently.doing'), defaultMessage: 'Deleting Permanently'})}
                 </Typography>
               )) || (
               <Typography textColor="neutral800">
-                Are you sure you want to permanently delete{" "}
-                {deletePermanentlyModalEntriesId.length > 1
-                  ? `${deletePermanentlyModalEntriesId.length} entries`
-                  : "one entry"}
-                ?
+                {formatMessage({id: getTrad('explorer.confirmation.deletePermanently.description'), defaultMessage: 'Are you sure you want to delete this permanently?'})}
               </Typography>
             )}
           </ModalBody>
@@ -669,7 +657,7 @@ const HomePage: React.FunctionComponent = () => {
                 variant="tertiary"
                 disabled={isDeletingPermanently}
               >
-                Cancel
+                {formatMessage({id: getTrad('cancel'), defaultMessage: 'Cancel'})}
               </Button>
             }
             endActions={
@@ -678,7 +666,7 @@ const HomePage: React.FunctionComponent = () => {
                 onClick={confirmDeletePermanently}
                 disabled={isDeletingPermanently}
               >
-                Yes
+                {formatMessage({id: getTrad('confirm'), defaultMessage: 'Confirm'})}
               </Button>
             }
           />

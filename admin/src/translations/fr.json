@@ -1,3 +1,25 @@
 {
-  "name": "Soft Delete"
+  "name": "Soft Delete",
+  "back": "Retour",
+  "cancel": "Annuler",
+  "confirm": "Confirmer",
+  "save": "Valider",
+  "setting.restorationBehavior": "Comportement de Restauration",
+  "explorer.collectionTypes": "Types de Collections",
+  "explorer.singleTypes": "Types Uniques",
+  "explorer.countEntriesFound": "{count} entrées trouvées",
+  "explorer.softDeletedAt": "Soft Deleted At",
+  "explorer.softDeletedBy": "Soft Deleted By",
+  "explorer.actions": "Actions",
+  "explorer.restore": "Restaurer",
+  "explorer.deletePermanently": "Supprimer définitivement",
+  "explorer.noEntriesFound": "Aucune entrée trouvée",
+  "explorer.errorLoadingEntries": "Erreur lors du chargement des entrées",
+  "explorer.noPermissions": "Vous n'avez pas les permissions pour accéder à ce contenu",
+  "explorer.confirmation.restore.title": "Confirmer Restauration",
+  "explorer.confirmation.restore.description": "Êtes-vous sûr de vouloir restaurer ceci?",
+  "explorer.confirmation.restore.doing": "Restauration",
+  "explorer.confirmation.deletePermanently.title": "Confirmer Suppression Définitive",
+  "explorer.confirmation.deletePermanently.description": "Êtes-vous sûr de vouloir supprimer définitivement ceci?",
+  "explorer.confirmation.deletePermanently.doing": "Suppression Définitive"
 }

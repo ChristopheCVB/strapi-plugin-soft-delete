@@ -139,11 +139,12 @@ Feel free to fork and make a PR if you want to add something or fix a bug.
   - [x] Entries list
   - [x] Restore action
   - [x] Delete Permanently action
-  - [ ] Translation
+  - [x] Translation
   - [ ] Soft Deleted Entry details
-- ⚙️ Plugin Configuration
-  - [ ] Single Type restoration behavior
-  - [ ] Draft & Publish restoration behavior
+- ⚙️ Plugin Settings
+  - [-] Restoration Behavior
+    - [ ] Single Type
+    - [ ] Draft & Publish
 
 ## 🚮 Uninstall
 
