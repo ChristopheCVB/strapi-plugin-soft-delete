@@ -33,8 +33,9 @@ import {
   ModalBody,
   ModalFooter,
   Button,
+  Loader,
 } from '@strapi/design-system';
-import { Trash, ArrowLeft, Refresh, EmptyDocuments, EmptyPermissions, Loader } from '@strapi/icons';
+import { Trash, ArrowLeft, Refresh, EmptyDocuments, EmptyPermissions } from '@strapi/icons';
 
 const { useState, useEffect } = React;
 import { useHistory, useParams } from 'react-router-dom'
@@ -535,7 +536,7 @@ const HomePage: React.FunctionComponent = () => {
           )}
           {isLoading && (
             <Flex justifyContent="center" alignItems="center" height="100%">
-              <Loader width="20rem" height="20rem" />
+              <Loader />
             </Flex>
           )}
           {!isLoading && loadingError && (
@@ -586,15 +587,9 @@ const HomePage: React.FunctionComponent = () => {
             </Typography>
           </ModalHeader>
           <ModalBody>
-            {(isRestoring && <Loader width="10rem" height="10rem" /> && (
-              <Typography textColor="neutral800">
-                {formatMessage({id: getTrad('explorer.confirmation.restore.doing'), defaultMessage: 'Restoring'})}
-              </Typography>
-            )) || (
-              <Typography textColor="neutral800">
-                {formatMessage({id: getTrad('explorer.confirmation.restore.description'), defaultMessage: 'Are you sure you want to restore this?'})}
-              </Typography>
-            )}
+            <Typography textColor="neutral800">
+              {formatMessage({id: getTrad('explorer.confirmation.restore.description'), defaultMessage: 'Are you sure you want to restore this?'})}
+            </Typography>
           </ModalBody>
           <ModalFooter
             startActions={
@@ -610,9 +605,10 @@ const HomePage: React.FunctionComponent = () => {
               <Button
                 variant="default"
                 onClick={confirmRestore}
-                disabled={isRestoring}
+                loading={isRestoring}
+                startIcon={<Refresh />}
               >
-                {formatMessage({id: getTrad('confirm'), defaultMessage: 'Confirm'})}
+                {formatMessage({id: getTrad('explorer.restore'), defaultMessage: 'Restore'})}
               </Button>
             }
           />
@@ -638,17 +634,9 @@ const HomePage: React.FunctionComponent = () => {
             </Typography>
           </ModalHeader>
           <ModalBody>
-            {(isDeletingPermanently && (
-                <Loader width="10rem" height="10rem" />
-              ) && (
-                <Typography textColor="neutral800">
-                  {formatMessage({id: getTrad('explorer.confirmation.deletePermanently.doing'), defaultMessage: 'Deleting Permanently'})}
-                </Typography>
-              )) || (
-              <Typography textColor="neutral800">
-                {formatMessage({id: getTrad('explorer.confirmation.deletePermanently.description'), defaultMessage: 'Are you sure you want to delete this permanently?'})}
-              </Typography>
-            )}
+            <Typography textColor="neutral800">
+              {formatMessage({id: getTrad('explorer.confirmation.deletePermanently.description'), defaultMessage: 'Are you sure you want to delete this permanently?'})}
+            </Typography>
           </ModalBody>
           <ModalFooter
             startActions={
@@ -662,11 +650,12 @@ const HomePage: React.FunctionComponent = () => {
             }
             endActions={
               <Button
-                variant="danger"
+                variant="danger-light"
                 onClick={confirmDeletePermanently}
-                disabled={isDeletingPermanently}
+                loading={isRestoring}
+                startIcon={<Trash />}
               >
-                {formatMessage({id: getTrad('confirm'), defaultMessage: 'Confirm'})}
+                {formatMessage({id: getTrad('explorer.deletePermanently'), defaultMessage: 'Delete permanently'})}
               </Button>
             }
           />

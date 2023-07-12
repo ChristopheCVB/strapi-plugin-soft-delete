@@ -2,7 +2,6 @@
   "name": "Soft Delete",
   "back": "Back",
   "cancel": "Cancel",
-  "confirm": "Confirm",
   "save": "Save",
   "setting.restorationBehavior": "Restoration Behavior",
   "setting.draftPublishBehavior": "Draft & Publish Behavior",
@@ -19,8 +18,6 @@
   "explorer.noPermissions": "You don't have permissions to access that content",
   "explorer.confirmation.restore.title": "Confirm Restoration",
   "explorer.confirmation.restore.description": "Are you sure you want to restore this?",
-  "explorer.confirmation.restore.doing": "Restoring",
   "explorer.confirmation.deletePermanently.title": "Confirm Delete Permanently",
-  "explorer.confirmation.deletePermanently.description": "Are you sure you want to delete this permanently?",
-  "explorer.confirmation.deletePermanently.doing": "Deleting Permanently"
+  "explorer.confirmation.deletePermanently.description": "Are you sure you want to delete this permanently?"
 }
