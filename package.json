@@ -21,13 +21,13 @@
     "delete"
   ],
   "dependencies": {
-    "@strapi/design-system": "^1.8.1",
-    "@strapi/helper-plugin": "^4.11.4",
-    "@strapi/icons": "^1.8.1",
+    "@strapi/design-system": "^1.8.2",
+    "@strapi/helper-plugin": "^4.11.5",
+    "@strapi/icons": "^1.8.2",
     "date-fns": "^2.30.0"
   },
   "devDependencies": {
-    "@strapi/typescript-utils": "^4.11.4",
+    "@strapi/typescript-utils": "^4.11.5",
     "@types/react": "^18.2.14",
     "@types/react-dom": "^18.0.28",
     "@types/react-intl": "^3.0.0",

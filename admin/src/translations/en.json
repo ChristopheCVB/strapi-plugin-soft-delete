@@ -3,8 +3,6 @@
   "back": "Back",
   "cancel": "Cancel",
   "save": "Save",
-  "setting.restorationBehavior": "Restoration Behavior",
-  "setting.draftPublishBehavior": "Draft & Publish Behavior",
   "explorer.collectionTypes": "Collection Types",
   "explorer.singleTypes": "Single Types",
   "explorer.countEntriesFound": "{count} entries found",
@@ -25,5 +23,10 @@
   "explorer.confirmation.restore.title": "Confirm Restoration",
   "explorer.confirmation.restore.description": "Are you sure you want to restore this?",
   "explorer.confirmation.deletePermanently.title": "Confirm Delete Permanently",
-  "explorer.confirmation.deletePermanently.description": "Are you sure you want to delete this permanently?"
+  "explorer.confirmation.deletePermanently.description": "Are you sure you want to delete this permanently?",
+  "setting.restorationBehavior": "Restoration Behavior",
+  "setting.restorationBehavior.singleTypes.hint": "Single types cannot be restored in the same way as collections. You can choose to soft delete the existing unique type or delete it permanently.",
+  "setting.restorationBehavior.softDeleteExisting": "Soft delete existing",
+  "setting.restorationBehavior.deletePermanentlyExisting": "Delete permanently existing",
+  "setting.draftPublishBehavior": "Draft & Publish Behavior"
 }

@@ -39,6 +39,11 @@ A plugin for [Strapi Headless CMS](https://github.com/strapi/strapi) that provid
       - ⚠️ Restoring a Single Type entry may replace the existing entry. This is because Single Types are unique and can only have one entry (although they're stored like collections in databse).
       - ℹ️ Restoring a Content Type entry will restore it in the Content Manager explorer without changing its fields, meaning that if the Content Type supports Draft & Publish and its publication state was published, it will be restored as published.
   - 🗑️ Entries can be permanently deleted with the `Delete Permanently` action. This will delete the entry permanently from the databse.
+- ⚙️ Settings
+  - Restoration Behavior: This setting allows you to choose the behavior when restoring an entry.
+    - Single Type
+      - Soft Delete: Restoring a Single Type entry will restore it to the Content Manager explorer and Soft Delete the existing entry.
+      - Delete Permanently: Restoring a Single Type entry will restore it to the Content Manager explorer and Delete Permanently the existing entry.
 
 ## ⛔ Permissions
 
@@ -130,7 +135,7 @@ Feel free to fork and make a PR if you want to add something or fix a bug.
   - [x] Decorate Content Type Entity Services to hide entries upon `find` or `findMany` methods
   - [x] RBAC Permissions
   - [x] Admin Routes
-  - [ ] Single Type entry restore special case
+  - [x] Single Type entry restore special case
   - [ ] Draft & Publish support when restoring an entry
   - [ ] Custom Lifecycle Hooks
   - [ ] Handle Soft Deleting Components
@@ -144,7 +149,7 @@ Feel free to fork and make a PR if you want to add something or fix a bug.
   - [ ] Soft Deleted Entry details
 - ⚙️ Plugin Settings
   - [x] Restoration Behavior
-    - [ ] Single Type
+    - [x] Single Type
     - [ ] Draft & Publish
 
 ## 🚮 Uninstall

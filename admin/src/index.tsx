@@ -42,7 +42,7 @@ export default {
     app.registerPlugin({
       id: pluginId,
       name,
-      initializer: Initializer,
+      initializer: Initializer, // FIXME: What does this do?
       isReady: false, // FIXME: What does this do?
     });
   },

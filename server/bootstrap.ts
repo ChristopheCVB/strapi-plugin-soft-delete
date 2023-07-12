@@ -1,6 +1,7 @@
 import { Strapi } from '@strapi/strapi';
 import { uidMatcher } from "../utils";
 import { pluginId } from "../utils/plugin";
+import { getSoftDeletedBy } from "./utils";
 
 const sdWrapParams = async (defaultService: any, opts: any, ctx: { uid: string, action: string }) => {
   const { uid, action } = ctx
@@ -26,14 +27,21 @@ const sdWrapParams = async (defaultService: any, opts: any, ctx: { uid: string, 
   };
 }
 
-const getSoftDeletedBy = (ctx: any) => {
-  const authId: number | null = ctx.state.auth.credentials?.id || null
-  const authStrategy: string = ctx.state.auth.strategy.name
-
-  return { authId, authStrategy }
-}
-
 export default async ({ strapi }: { strapi: Strapi & { admin: any } }) => {
+  // Setup Plugin Settings
+  const pluginStore = strapi.store({
+    environment: strapi.config.environment,
+    type: 'plugin',
+    name: pluginId,
+  });
+  const pluginStoreSettings = await pluginStore.get({ key: 'settings' });
+  if (!pluginStoreSettings) {
+    const defaultSettings = {
+      singleTypesResorationBehavior: 'soft-delete'
+    };
+    await pluginStore.set({ key: 'settings', value: defaultSettings });
+  }
+
   // Setup Permissions
   strapi.admin.services.permission.actionProvider.get('plugin::content-manager.explorer.delete').displayName = 'Soft Delete';
 
@@ -43,7 +51,14 @@ export default async ({ strapi }: { strapi: Strapi & { admin: any } }) => {
     displayName: 'Read',
     pluginName: pluginId,
     section: 'plugins',
-  })
+  });
+
+  strapi.admin.services.permission.actionProvider.register({
+    uid: 'settings',
+    displayName: 'Settings',
+    pluginName: pluginId,
+    section: 'plugins',
+  });
 
   strapi.admin.services.permission.actionProvider.register({
     uid: 'explorer.read',
@@ -71,7 +86,6 @@ export default async ({ strapi }: { strapi: Strapi & { admin: any } }) => {
     pluginName: pluginId,
     subjects: contentTypeUids,
   });
-
 
   // Decorate Entity Services
   strapi.entityService.decorate((defaultService) => ({

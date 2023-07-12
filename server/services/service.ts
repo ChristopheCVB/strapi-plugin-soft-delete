@@ -1,4 +1,6 @@
 import { Strapi } from '@strapi/strapi';
+import { pluginId } from '../../utils/plugin'
+import { getSoftDeletedBy } from '../utils';
 
 declare type SoftDeletedBy = {
   id?: number;
@@ -7,7 +9,13 @@ declare type SoftDeletedBy = {
 }
 
 export default ({ strapi }: { strapi: Strapi }) => ({
-  getSoftDeletedBy: async (entry: any) => {
+  pluginStore: strapi.store({
+    environment: strapi.config.environment,
+    type: 'plugin',
+    name: pluginId,
+  }),
+
+  getSoftDeletedByEntry: async (entry: any) => {
     const _softDeletedBy: SoftDeletedBy = {
       id: entry._softDeletedById,
       type: entry._softDeletedByType,
@@ -53,7 +61,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
 
     return {
       ...entity,
-      _softDeletedBy: await this.getSoftDeletedBy(entity),
+      _softDeletedBy: await this.getSoftDeletedByEntry(entity),
     }
   },
 
@@ -71,7 +79,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     })).map(async (entry) => {
       return {
         ...entry,
-        _softDeletedBy: await this.getSoftDeletedBy(entry),
+        _softDeletedBy: await this.getSoftDeletedByEntry(entry),
       }
     }));
   },
@@ -85,10 +93,8 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     });
   },
 
-  restore(ctx) {
-    // FIXME: Handle ctx.params.kind === singleType
-    // TODO: Handle publicationState
-    return strapi.query(ctx.params.uid).update({
+  async restore(ctx) {
+    const result = await strapi.query(ctx.params.uid).update({
       select: '*',
       where: {
         id: ctx.params.id,
@@ -99,10 +105,43 @@ export default ({ strapi }: { strapi: Strapi }) => ({
         _softDeletedByType: null,
       },
     });
+
+    const pluginSettings = await this.pluginStore.get({ key: 'settings' });
+    if (ctx.params.kind === 'singleType') {
+      switch (pluginSettings.singleTypesResorationBehavior) {
+        case 'soft-delete':
+          const {authId, authStrategy} = getSoftDeletedBy(ctx);
+          await strapi.query(ctx.params.uid).update({
+            where: {
+              id: {
+                $ne: ctx.params.id,
+              },
+            },
+            data: {
+              _softDeletedAt: Date.now(),
+              _softDeletedById: authId,
+              _softDeletedByType: authStrategy,
+            },
+          });
+          break;
+
+        case 'delete-permanently':
+          await strapi.query(ctx.params.uid).delete({
+            where: {
+              id: {
+                $ne: ctx.params.id,
+              },
+            },
+          });
+          break;
+      }
+    }
+    // TODO: Handle publicationState
+    return result;
   },
 
-  deleteMany(ctx) {
-    return strapi.query(ctx.params.uid).deleteMany({
+  async deleteMany(ctx) {
+    return await strapi.query(ctx.params.uid).deleteMany({
       select: '*',
       where: {
         id: ctx.request.body.data.ids,
@@ -110,10 +149,9 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     });
   },
 
-  restoreMany(ctx) {
-    // FIXME: Handle ctx.params.kind === singleType
+  async restoreMany(ctx) {
     // TODO: Handle publicationState
-    return strapi.query(ctx.params.uid).updateMany({
+    const result = await strapi.query(ctx.params.uid).updateMany({
       select: '*',
       where: {
         id: ctx.request.body.data.ids,
@@ -124,5 +162,47 @@ export default ({ strapi }: { strapi: Strapi }) => ({
         _softDeletedByType: null,
       },
     });
+
+    const pluginSettings = await this.pluginStore.get({ key: 'settings' });
+    if (ctx.params.kind === 'singleType') {
+      const {authId, authStrategy} = getSoftDeletedBy(ctx);
+      switch (pluginSettings.singleTypesResorationBehavior) {
+        case 'soft-delete':
+          await strapi.query(ctx.params.uid).updateMany({
+            where: {
+              id: {
+                $notIn: ctx.request.body.data.ids,
+              },
+            },
+            data: {
+              _softDeletedAt: Date.now(),
+              _softDeletedById: authId,
+              _softDeletedByType: authStrategy,
+            },
+          });
+          break;
+
+        case 'delete-permanently':
+          await strapi.query(ctx.params.uid).deleteMany({
+            where: {
+              id: {
+                $notIn: ctx.request.body.data.ids,
+              },
+            },
+          });
+          break;
+      }
+    }
+
+    return result;
+  },
+
+  async getSettings() {
+    return await this.pluginStore.get({ key: 'settings' });
+  },
+
+  async setSettings(settings) {
+    await this.pluginStore.set({ key: 'settings', value: settings });
+    return await this.pluginStore.get({ key: 'settings' });
   },
 });

@@ -3,7 +3,6 @@
   "back": "Retour",
   "cancel": "Annuler",
   "save": "Valider",
-  "setting.restorationBehavior": "Comportement de Restauration",
   "explorer.collectionTypes": "Types de Collections",
   "explorer.singleTypes": "Types Uniques",
   "explorer.countEntriesFound": "{count} entrées trouvées",
@@ -24,5 +23,10 @@
   "explorer.confirmation.restore.title": "Confirmer Restauration",
   "explorer.confirmation.restore.description": "Êtes-vous sûr de vouloir restaurer ceci?",
   "explorer.confirmation.deletePermanently.title": "Confirmer Suppression Définitive",
-  "explorer.confirmation.deletePermanently.description": "Êtes-vous sûr de vouloir supprimer définitivement ceci?"
+  "explorer.confirmation.deletePermanently.description": "Êtes-vous sûr de vouloir supprimer définitivement ceci?",
+  "setting.restorationBehavior": "Comportement de Restauration",
+  "setting.restorationBehavior.singleTypes.hint": "Les types uniques ne peuvent être restaurés de la même manière que les collections. Vous pouvez choisir de soft delete le type unique existant ou de le supprimer définitivement.",
+  "setting.restorationBehavior.softDeleteExisting": "Soft Delete existant",
+  "setting.restorationBehavior.deletePermanentlyExisting": "Supprimer définitivement existant",
+  "setting.draftPublishBehavior": "Draft & Publish Behavior"
 }

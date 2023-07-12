@@ -1,6 +1,6 @@
 /*
  *
- * HomePage
+ * Explorer
  *
  */
 
@@ -36,7 +36,7 @@ import type {
 } from './types';
 import ContentTypeEntries from './ContentTypeEntries';
 
-const HomePage: React.FunctionComponent = () => {
+const Explorer: React.FunctionComponent = () => {
   const params: { kind: string, uid: string } = useParams();
 
   const { formatMessage } = useIntl();
@@ -51,7 +51,6 @@ const HomePage: React.FunctionComponent = () => {
   const [loadingError, setLoadingError] = useState<Error | undefined>(undefined);
 
   const [activeContentType, setActiveContentType] = useState<ContentTypeNavLink | undefined>(undefined);
-
 
   useEffect(() => {
     setIsLoading(true);
@@ -224,4 +223,4 @@ const HomePage: React.FunctionComponent = () => {
   );
 };
 
-export default HomePage;
+export default Explorer;

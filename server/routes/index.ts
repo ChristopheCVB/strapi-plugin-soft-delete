@@ -1,8 +1,9 @@
-import admin from './admin';
+import adminContentTypes from './adminContentTypes';
+import adminSettings from './adminSettings';
 
 export default {
   admin: {
     type: 'admin',
-    routes: admin,
+    routes: [...adminContentTypes, ...adminSettings],
   },
 };

@@ -36,4 +36,16 @@ export default ({ strapi }: { strapi: Strapi }) => ({
 
     return await service.restoreMany(ctx);
   },
+
+  async getSettings(ctx) {
+    const service = strapi.plugin('soft-delete').service('service');
+
+    return await service.getSettings(ctx);
+  },
+
+  async setSettings(ctx) {
+    const service = strapi.plugin('soft-delete').service('service');
+
+    return await service.setSettings(ctx.request.body);
+  },
 });
