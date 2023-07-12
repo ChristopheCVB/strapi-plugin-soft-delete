@@ -33,10 +33,10 @@ A plugin for [Strapi Headless CMS](https://github.com/strapi/strapi) that provid
   - A new admin permission is added to the `Settings > Roles > Edit a Role > Collection Types | Single Types` section. This is the `Deleted Restore` permission. This will allow the admin role to restore the soft deleted entries.
   - A new admin permission is added to the `Settings > Roles > Edit a Role > Collection Types | Single Types` section. This is the `Delete Permanently` permission. This will allow the admin role to delete permanently the soft deleted entries.
   - A new admin permission is added to the `Settings > Roles > Edit a Role > Plugins > Soft Delete` section. This is the global `Read` permission of the plugin. This will allow the admin role to view the Soft Delete item in the Admin left Panel. Accessing this will list all the content types the admin role has access to. They can restore or delete permanently the entries from here depending on the above permissions.
+  - A new admin permission is added to the `Settings > Roles > Edit a Role > Plugins > Soft Delete` section. This is the global `Settings` permission of the plugin. This will allow the admin role to view the Soft Delete plugin settings.
 - 🗂️ Soft Delete Explorer (Admin left Panel item): Displays Soft Deleted Collection & Single Type entries 
   - ♻️ Entries can be restored with the `Restore` action. This will set the fields `_softDeletedAt`, `_softDeletedById` and `_softDeletedByType` to `null`.
     - Restoring an entry from the Soft Delete explorer will restore it to the Content Manager explorer.
-      - ⚠️ Restoring a Single Type entry may replace the existing entry. This is because Single Types are unique and can only have one entry (although they're stored like collections in databse).
       - ℹ️ Restoring a Content Type entry will restore it in the Content Manager explorer without changing its fields, meaning that if the Content Type supports Draft & Publish and its publication state was published, it will be restored as published.
   - 🗑️ Entries can be permanently deleted with the `Delete Permanently` action. This will delete the entry permanently from the databse.
 - ⚙️ Settings
@@ -53,6 +53,7 @@ A plugin for [Strapi Headless CMS](https://github.com/strapi/strapi) that provid
 | Collection Type & Single Type | `Deleted Restore` | Allows the admin role to restore the soft deleted entries. |
 | Collection Type & Single Type | `Delete Permanently` | Allows the admin role to delete permanently the soft deleted entries. |
 | Plugins | `Read` | Allows the admin role to view the Soft Delete item in the Admin left Panel. |
+| Plugins | `Settings` | Allows the admin role to view the Soft Delete plugin settings. |
 
 ## 📦 Compatibility
 
