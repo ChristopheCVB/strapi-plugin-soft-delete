@@ -5,6 +5,7 @@
   "save": "Valider",
   "explorer.collectionTypes": "Types de Collections",
   "explorer.singleTypes": "Types Uniques",
+  "explorer.draftPublish": "Brouillons & Publications",
   "explorer.countEntriesFound": "{count} entrées trouvées",
   "explorer.softDeletedAt": "Soft Deleted At",
   "explorer.softDeletedBy": "Soft Deleted By",
@@ -28,5 +29,10 @@
   "setting.restorationBehavior.singleTypes.hint": "Les types uniques ne peuvent être restaurés de la même manière que les collections. Vous pouvez choisir de soft delete le type unique existant ou de le supprimer définitivement.",
   "setting.restorationBehavior.softDeleteExisting": "Soft Delete existant",
   "setting.restorationBehavior.deletePermanentlyExisting": "Supprimer définitivement existant",
-  "setting.draftPublishBehavior": "Draft & Publish Behavior"
+  "setting.restorationBehavior.draftPublish.hint": "Vous pouvez choisir de restaurer une entrée supportant la fonctionnalité de Brouillons & Publications en brouillon ou sans en changer son statut.",
+  "setting.restorationBehavior.draft": "Brouillon",
+  "setting.restorationBehavior.unchanged": "Inchangé",
+  "settings.save.success": "Paramètres enregistrés avec succès",
+  "settings.save.error": "Erreur lors de l'enregistrement des paramètres",
+  "settings.load.error": "Erreur lors du chargement des paramètres"
 }

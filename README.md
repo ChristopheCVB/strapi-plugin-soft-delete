@@ -36,14 +36,15 @@ A plugin for [Strapi Headless CMS](https://github.com/strapi/strapi) that provid
   - A new admin permission is added to the `Settings > Roles > Edit a Role > Plugins > Soft Delete` section. This is the global `Settings` permission of the plugin. This will allow the admin role to view the Soft Delete plugin settings.
 - 🗂️ Soft Delete Explorer (Admin left Panel item): Displays Soft Deleted Collection & Single Type entries 
   - ♻️ Entries can be restored with the `Restore` action. This will set the fields `_softDeletedAt`, `_softDeletedById` and `_softDeletedByType` to `null`.
-    - Restoring an entry from the Soft Delete explorer will restore it to the Content Manager explorer.
-      - ℹ️ Restoring a Content Type entry will restore it in the Content Manager explorer without changing its fields, meaning that if the Content Type supports Draft & Publish and its publication state was published, it will be restored as published.
   - 🗑️ Entries can be permanently deleted with the `Delete Permanently` action. This will delete the entry permanently from the databse.
 - ⚙️ Settings
   - Restoration Behavior: This setting allows you to choose the behavior when restoring an entry.
     - Single Type
       - Soft Delete: Restoring a Single Type entry will restore it to the Content Manager explorer and Soft Delete the existing entry.
       - Delete Permanently: Restoring a Single Type entry will restore it to the Content Manager explorer and Delete Permanently the existing entry.
+    - Draft & Publish
+      - Draft: Restoring a Draft & Publish entry will restore it to the Content Manager explorer as a draft.
+      - Unchanged: Restoring a Draft & Publish entry will restore it to the Content Manager explorer unchanged, meaning that if the entry was published, it will be restored as published.
 
 ## ⛔ Permissions
 
@@ -137,13 +138,15 @@ Feel free to fork and make a PR if you want to add something or fix a bug.
   - [x] RBAC Permissions
   - [x] Admin Routes
   - [x] Single Type entry restore special case
-  - [ ] Draft & Publish support when restoring an entry
+  - [x] Draft & Publish support when restoring an entry
   - [ ] Custom Lifecycle Hooks
   - [ ] Handle Soft Deleting Components
   - [ ] Add tests
 - 🗂️ Soft Delete Explorer
   - [x] Content Types list
   - [x] Entries list
+    - [ ] Pagination
+    - [ ] Filters
   - [x] Restore action
   - [x] Delete Permanently action
   - [x] Translation
@@ -151,7 +154,8 @@ Feel free to fork and make a PR if you want to add something or fix a bug.
 - ⚙️ Plugin Settings
   - [x] Restoration Behavior
     - [x] Single Type
-    - [ ] Draft & Publish
+    - [x] Draft & Publish
+  - [ ] Deletion Automation
 
 ## 🚮 Uninstall
 

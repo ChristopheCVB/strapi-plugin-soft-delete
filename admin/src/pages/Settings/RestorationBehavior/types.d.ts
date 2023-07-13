@@ -1,3 +1,4 @@
 export type Settings = {
-  singleTypesResorationBehavior: 'soft-delete' | 'delete-permanently',
+  singleTypesRestorationBehavior: 'soft-delete' | 'delete-permanently',
+  draftPublishRestorationBehavior: 'draft' | 'unchanged',
 }

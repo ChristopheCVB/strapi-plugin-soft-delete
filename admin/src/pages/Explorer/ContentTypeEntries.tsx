@@ -55,6 +55,7 @@ const ContentTypeEntries: React.FunctionComponent<Props> = ({contentType}) => {
   const [mainField, setMainField] = useState<string| null>(null);
   const [entries, setEntries] = useState<ContentTypeEntry[]>([]);
   const [selectedEntriesId, setSelectedEntriesId] = useState<number[]>([]);
+  const [alert, setAlert] = useState<{variant: 'success' | 'danger', message: string} | undefined>(undefined);
 
   const canRestore = allPermissions.some(permission =>
     permission.action === `plugin::${pluginId}.explorer.restore` &&
@@ -100,11 +101,10 @@ const ContentTypeEntries: React.FunctionComponent<Props> = ({contentType}) => {
 
   const [restoreModalEntriesId, setRestoreModalEntriesId] = useState<number[]>([]);
   const [isRestoring, setIsRestoring] = useState<boolean>(false);
-  const [restoreResult, setRestoreResult] = useState<Error | true | undefined>(undefined);
   const confirmRestore = () => {
     if (isRestoring) return;
 
-    setRestoreResult(undefined);
+    setAlert(undefined);
     setIsRestoring(true);
     put(`/${pluginId}/${contentType?.kind}/${contentType?.uid}/restore`, {
       data: {
@@ -114,27 +114,32 @@ const ContentTypeEntries: React.FunctionComponent<Props> = ({contentType}) => {
       .then(() => {
         setEntries(entries.filter(entry => !restoreModalEntriesId.includes(entry.id)));
         setSelectedEntriesId([]);
-        setRestoreResult(true);
+        setAlert({
+          variant: 'success',
+          message: formatMessage({id: getTrad('explorer.restore.success'), defaultMessage: 'Entries restored successfully'}),
+        });
       })
       .catch((error: Error) => {
-        setRestoreResult(error);
+        setAlert({
+          variant: 'danger',
+          message: formatMessage({id: getTrad('explorer.restore.error'), defaultMessage: 'Error restoring entries'}),
+        });
       })
       .finally(() => {
         setRestoreModalEntriesId([]);
         setIsRestoring(false);
         setTimeout(() => {
-          setRestoreResult(undefined);
+          setAlert(undefined);
         }, 3000);
       });
   };
 
   const [deletePermanentlyModalEntriesId, setDeletePermanentlyModalEntriesId] = useState<number[]>([]);
   const [isDeletingPermanently, setIsDeletingPermanently] = useState<boolean>(false);
-  const [deletePermanentlyResult, setDeletePermanentlyResult] = useState<Error | true | undefined>(undefined);
   const confirmDeletePermanently = () => {
     if (isDeletingPermanently) return;
 
-    setDeletePermanentlyResult(undefined);
+    setAlert(undefined);
     setIsDeletingPermanently(true);
     put(`/${pluginId}/${contentType?.kind}/${contentType?.uid}/delete`, {
       data: {
@@ -144,23 +149,34 @@ const ContentTypeEntries: React.FunctionComponent<Props> = ({contentType}) => {
       .then(() => {
         setEntries(entries.filter(entry => !deletePermanentlyModalEntriesId.includes(entry.id)));
         setSelectedEntriesId([]);
-        setDeletePermanentlyResult(true);
+        setAlert({
+          variant: 'success',
+          message: formatMessage({id: getTrad('explorer.deletePermanently.success'), defaultMessage: 'Entries deleted permanently successfully'}),
+        });
       })
       .catch((error: Error) => {
-        setDeletePermanentlyResult(error);
+        setAlert({
+          variant: 'danger',
+          message: formatMessage({id: getTrad('explorer.deletePermanently.error'), defaultMessage: 'Error deleting entries permanently'}),
+        });
       })
       .finally(() => {
         setDeletePermanentlyModalEntriesId([]);
         setIsDeletingPermanently(false);
         setTimeout(() => {
-          setDeletePermanentlyResult(undefined);
+          setAlert(undefined);
         }, 3000);
       });
   };
 
   return (
     <>
-      {contentType && (
+      {isLoading && (
+        <Flex justifyContent="center" alignItems="center" height="100%">
+          <Loader />
+        </Flex>
+      )}
+      {!isLoading && !loadingError && contentType && (
         <BaseHeaderLayout
           navigationAction={
             <Link startIcon={<ArrowLeft />} to={`/plugins/${pluginId}`}>
@@ -172,7 +188,7 @@ const ContentTypeEntries: React.FunctionComponent<Props> = ({contentType}) => {
           as="h2"
         />
       )}
-      {!isLoading && contentType && (
+      {!isLoading && !loadingError && contentType && (
         <ContentLayout>
           <Table
             colCount={
@@ -344,11 +360,6 @@ const ContentTypeEntries: React.FunctionComponent<Props> = ({contentType}) => {
           </Table>
         </ContentLayout>
       )}
-      {isLoading && (
-        <Flex justifyContent="center" alignItems="center" height="100%">
-          <Loader />
-        </Flex>
-      )}
       {!isLoading && loadingError && (
         <Flex
           direction="column"
@@ -469,31 +480,15 @@ const ContentTypeEntries: React.FunctionComponent<Props> = ({contentType}) => {
           />
         </ModalLayout>
       )) || <></>}
-      {(restoreResult && <Alert
+      {(alert && <Alert
         position="fixed"
         top="5%"
         left="40%"
         zIndex="100"
-        variant={restoreResult === true ? 'success' : 'danger'}
-        onClose={() => setRestoreResult(undefined)}
+        variant={alert.variant}
+        onClose={() => setAlert(undefined)}
       >
-        {restoreResult === true ?
-          formatMessage({id: getTrad('explorer.restore.success'), defaultMessage: 'Entries restored successfully'}) :
-          formatMessage({id: getTrad('explorer.restore.error'), defaultMessage: 'Error restoring entries'})
-        }
-      </Alert>) || <></>}
-      {(deletePermanentlyResult && <Alert
-        position="fixed"
-        top="5%"
-        left="40%"
-        zIndex="100"
-        variant={deletePermanentlyResult === true ? 'success' : 'danger'}
-        onClose={() => setDeletePermanentlyResult(undefined)}
-      >
-        {deletePermanentlyResult === true ?
-          formatMessage({id: getTrad('explorer.deletePermanently.success'), defaultMessage: 'Entries deleted permanently successfully'}) :
-          formatMessage({id: getTrad('explorer.deletePermanently.error'), defaultMessage: 'Error deleting entries permanently'})
-        }
+        {alert.message}
       </Alert>) || <></>}
     </>
   );

@@ -5,6 +5,7 @@
   "save": "Save",
   "explorer.collectionTypes": "Collection Types",
   "explorer.singleTypes": "Single Types",
+  "explorer.draftPublish": "Draft & Publish",
   "explorer.countEntriesFound": "{count} entries found",
   "explorer.softDeletedAt": "Soft Deleted At",
   "explorer.softDeletedBy": "Soft Deleted By",
@@ -28,5 +29,10 @@
   "setting.restorationBehavior.singleTypes.hint": "Single types cannot be restored in the same way as collections. You can choose to soft delete the existing unique type or delete it permanently.",
   "setting.restorationBehavior.softDeleteExisting": "Soft delete existing",
   "setting.restorationBehavior.deletePermanentlyExisting": "Delete permanently existing",
-  "setting.draftPublishBehavior": "Draft & Publish Behavior"
+  "setting.restorationBehavior.draftPublish.hint": "You can choose to restore an entry supporting Draft & Publish to a draft or unchanged.",
+  "setting.restorationBehavior.draft": "Draft",
+  "setting.restorationBehavior.unchanged": "Unchanged",
+  "settings.save.success": "Settings saved successfully",
+  "settings.save.error": "Error saving settings",
+  "settings.load.error": "Error loading settings"
 }

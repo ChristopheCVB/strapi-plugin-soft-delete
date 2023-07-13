@@ -1,6 +1,5 @@
 import { prefixPluginTranslations } from '@strapi/helper-plugin';
 import { pluginId, name } from '../../utils/plugin';
-import Initializer from './components/Initializer';
 import PluginIcon from './components/PluginIcon';
 import getTrad from './utils/getTrad';
 import permissions from './permissions';
@@ -42,8 +41,6 @@ export default {
     app.registerPlugin({
       id: pluginId,
       name,
-      initializer: Initializer, // FIXME: What does this do?
-      isReady: false, // FIXME: What does this do?
     });
   },
 

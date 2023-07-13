@@ -94,6 +94,13 @@ export default ({ strapi }: { strapi: Strapi }) => ({
   },
 
   async restore(ctx) {
+    const pluginSettings = await this.pluginStore.get({ key: 'settings' });
+
+    let publishedAt: undefined | null = undefined;
+    if (strapi.contentTypes[ctx.params.uid].options?.draftAndPublish && pluginSettings.draftPublishRestorationBehavior === 'draft') {
+      publishedAt = null;
+    }
+
     const result = await strapi.query(ctx.params.uid).update({
       select: '*',
       where: {
@@ -103,12 +110,12 @@ export default ({ strapi }: { strapi: Strapi }) => ({
         _softDeletedAt: null,
         _softDeletedById: null,
         _softDeletedByType: null,
+        publishedAt,
       },
     });
 
-    const pluginSettings = await this.pluginStore.get({ key: 'settings' });
     if (ctx.params.kind === 'singleType') {
-      switch (pluginSettings.singleTypesResorationBehavior) {
+      switch (pluginSettings.singleTypesRestorationBehavior) {
         case 'soft-delete':
           const {authId, authStrategy} = getSoftDeletedBy(ctx);
           await strapi.query(ctx.params.uid).update({
@@ -136,7 +143,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
           break;
       }
     }
-    // TODO: Handle publicationState
+
     return result;
   },
 
@@ -150,7 +157,13 @@ export default ({ strapi }: { strapi: Strapi }) => ({
   },
 
   async restoreMany(ctx) {
-    // TODO: Handle publicationState
+    const pluginSettings = await this.pluginStore.get({ key: 'settings' });
+
+    let publishedAt: undefined | null = undefined;
+    if (strapi.contentTypes[ctx.params.uid].options?.draftAndPublish && pluginSettings.draftPublishRestorationBehavior === 'draft') {
+      publishedAt = null;
+    }
+
     const result = await strapi.query(ctx.params.uid).updateMany({
       select: '*',
       where: {
@@ -160,13 +173,13 @@ export default ({ strapi }: { strapi: Strapi }) => ({
         _softDeletedAt: null,
         _softDeletedById: null,
         _softDeletedByType: null,
+        publishedAt,
       },
     });
 
-    const pluginSettings = await this.pluginStore.get({ key: 'settings' });
     if (ctx.params.kind === 'singleType') {
       const {authId, authStrategy} = getSoftDeletedBy(ctx);
-      switch (pluginSettings.singleTypesResorationBehavior) {
+      switch (pluginSettings.singleTypesRestorationBehavior) {
         case 'soft-delete':
           await strapi.query(ctx.params.uid).updateMany({
             where: {

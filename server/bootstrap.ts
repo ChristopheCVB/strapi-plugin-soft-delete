@@ -35,9 +35,10 @@ export default async ({ strapi }: { strapi: Strapi & { admin: any } }) => {
     name: pluginId,
   });
   const pluginStoreSettings = await pluginStore.get({ key: 'settings' });
-  if (!pluginStoreSettings) {
+  if (!pluginStoreSettings || !pluginStoreSettings.singleTypesRestorationBehavior || !pluginStoreSettings.draftPublishRestorationBehavior) {
     const defaultSettings = {
-      singleTypesResorationBehavior: 'soft-delete'
+      singleTypesRestorationBehavior: pluginStoreSettings?.singleTypesRestorationBehavior || 'soft-delete',
+      draftPublishRestorationBehavior: pluginStoreSettings?.draftPublishRestorationBehavior || 'unchanged',
     };
     await pluginStore.set({ key: 'settings', value: defaultSettings });
   }
