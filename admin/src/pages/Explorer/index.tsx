@@ -19,7 +19,7 @@ import {
   Typography,
 } from '@strapi/design-system';
 
-import { useHistory, useParams } from 'react-router-dom'
+import { useHistory, useParams } from 'react-router-dom';
 import { useFetchClient } from '@strapi/helper-plugin';
 import { uidMatcher } from '../../../../utils';
 import { useIntl } from 'react-intl';
@@ -107,7 +107,7 @@ const Explorer: React.FunctionComponent = () => {
       .finally(() => {
         setIsLoading(false);
       });
-  }, [])
+  }, []);
 
   useEffect(() => {
     const firstContentTypeNavLink = contentTypeNavLinks[0];
@@ -120,7 +120,7 @@ const Explorer: React.FunctionComponent = () => {
           params.kind === contentType.kind &&
           params.uid === contentType.uid
         )[0]
-      )
+      );
     }
   },[contentTypeNavLinks, params.kind, params.uid]);
 
