@@ -130,7 +130,7 @@ const Explorer: React.FunctionComponent = () => {
         sideNav={
           <SubNav ariaLabel="Soft Delete sub nav">
             <SubNavHeader
-              searchable
+              searchable={false}
               value={search}
               onClear={() => setSearch("")}
               onChange={(e: any) => setSearch(e.target.value)}
