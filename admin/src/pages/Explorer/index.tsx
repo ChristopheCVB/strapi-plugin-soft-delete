@@ -41,7 +41,7 @@ const Explorer: React.FunctionComponent = () => {
 
   const { formatMessage } = useIntl();
   const history = useHistory();
-  const [search, setSearch] = useState(''); // TODO: Implement Content Type search
+  const [search, setSearch] = useState('');
   const { get } = useFetchClient();
   const { allPermissions }: { allPermissions: Permission[] } = useRBACProvider();
 
@@ -130,12 +130,13 @@ const Explorer: React.FunctionComponent = () => {
         sideNav={
           <SubNav ariaLabel="Soft Delete sub nav">
             <SubNavHeader
-              searchable={false}
-              value={search}
-              onClear={() => setSearch("")}
-              onChange={(e: any) => setSearch(e.target.value)}
               label={formatMessage({id: getTrad('name'), defaultMessage: 'Soft Delete'})}
-              searchLabel="Search..."
+              searchable
+              value={search}
+              onChange={(e: any) => setSearch(e.target.value)}
+              onClear={() => setSearch("")}
+              searchLabel={formatMessage({id: getTrad('explorer.searchContentTypes'), defaultMessage: 'Search Content Types'})}
+              searchPlaceholder={formatMessage({id: getTrad('explorer.searchContentTypes'), defaultMessage: 'Search Content Types'})}
             />
             <SubNavSections>
               <SubNavSection
@@ -151,7 +152,8 @@ const Explorer: React.FunctionComponent = () => {
                 {contentTypeNavLinks
                   .filter(
                     (contentTypeNavLink) =>
-                      contentTypeNavLink.kind === "collectionType"
+                      contentTypeNavLink.kind === "collectionType" &&
+                      (search ? contentTypeNavLink.label.toLowerCase().includes(search.toLowerCase()) : true)
                   )
                   .map((contentType, index) => (
                     <SubNavLink
@@ -176,7 +178,8 @@ const Explorer: React.FunctionComponent = () => {
                 {contentTypeNavLinks
                   .filter(
                     (contentTypeNavLink) =>
-                      contentTypeNavLink.kind === "singleType"
+                      contentTypeNavLink.kind === "singleType" &&
+                      (search ? contentTypeNavLink.label.toLowerCase().includes(search.toLowerCase()) : true)
                   )
                   .map((contentType, index) => (
                     <SubNavLink
