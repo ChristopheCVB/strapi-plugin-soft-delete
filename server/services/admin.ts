@@ -90,7 +90,6 @@ export default ({ strapi }: { strapi: Strapi }) => ({
 
   delete(ctx) {
     return strapi.query(ctx.params.uid).delete({
-      select: '*',
       where: {
         id: ctx.params.id,
       },
@@ -106,7 +105,6 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     }
 
     const entry = await strapi.query(ctx.params.uid).update({
-      select: '*',
       where: {
         id: ctx.params.id,
       },
@@ -153,7 +151,6 @@ export default ({ strapi }: { strapi: Strapi }) => ({
 
   async deleteMany(ctx) {
     return await strapi.query(ctx.params.uid).deleteMany({
-      select: '*',
       where: {
         id: ctx.request.body.data.ids,
       },
@@ -169,7 +166,6 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     }
 
     const entries = await strapi.query(ctx.params.uid).updateMany({
-      select: '*',
       where: {
         id: ctx.request.body.data.ids,
       },
