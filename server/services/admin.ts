@@ -6,18 +6,18 @@ declare type SoftDeletedBy = {
   id?: number;
   type: string;
   name?: string;
-}
+};
 
 const getSoftDeletedByEntry = async (entry: any) => {
   const _softDeletedBy: SoftDeletedBy = {
     id: entry._softDeletedById,
     type: entry._softDeletedByType,
-  }
+  };
   if (entry._softDeletedById && entry._softDeletedByType) {
     try {
       switch (entry._softDeletedByType) {
         case 'admin':
-          const adminUser = await strapi.entityService.findOne('admin::user', entry._softDeletedById)
+          const adminUser = await strapi.entityService.findOne('admin::user', entry._softDeletedById);
           _softDeletedBy.name = adminUser.username || (adminUser.firstname || adminUser.lastname ? adminUser.firstname + ' ' + adminUser.lastname : false) || adminUser.email;
           break;
 
@@ -64,7 +64,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       _softDeletedById: undefined,
       _softDeletedByType: undefined,
       _softDeletedBy: await getSoftDeletedByEntry(entry),
-    }
+    };
   },
 
   async findMany(ctx) {
@@ -84,7 +84,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
         _softDeletedById: undefined,
         _softDeletedByType: undefined,
         _softDeletedBy: await getSoftDeletedByEntry(entry),
-      }
+      };
     }));
   },
 

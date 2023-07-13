@@ -3,8 +3,8 @@ import { uidMatcher, plugin } from "../utils";
 import { getSoftDeletedByAuth } from "./utils";
 
 const sdWrapParams = async (defaultService: any, opts: any, ctx: { uid: string, action: string }) => {
-  const { uid, action } = ctx
-  const wrappedParams = await defaultService.wrapParams(opts, ctx)
+  const { uid, action } = ctx;
+  const wrappedParams = await defaultService.wrapParams(opts, ctx);
   if (!uidMatcher(uid)) {
     return wrappedParams;
   }
@@ -19,9 +19,9 @@ const sdWrapParams = async (defaultService: any, opts: any, ctx: { uid: string, 
         {
           _softDeletedAt: {
             $null: true
-          }
-        }
-      ]
+          },
+        },
+      ],
     },
   };
 }
@@ -94,10 +94,10 @@ export default async ({ strapi }: { strapi: Strapi & { admin: any } }) => {
         return await defaultService.delete(uid, id, opts);
       }
 
-      const wrappedParams = await defaultService.wrapParams(opts, { uid, action: 'delete' })
+      const wrappedParams = await defaultService.wrapParams(opts, { uid, action: 'delete' });
 
-      const ctx = strapi.requestContext.get()
-      const { id: authId, strategy: authStrategy } = getSoftDeletedByAuth(ctx.state.auth)
+      const ctx = strapi.requestContext.get();
+      const { id: authId, strategy: authStrategy } = getSoftDeletedByAuth(ctx.state.auth);
 
       return await defaultService.update(uid, id, {
         ...wrappedParams,
@@ -115,13 +115,14 @@ export default async ({ strapi }: { strapi: Strapi & { admin: any } }) => {
         return await defaultService.deleteMany(uid, opts);
       }
 
-      const wrappedParams = await defaultService.wrapParams(opts, { uid, action: 'deleteMany' })
+      const wrappedParams = await defaultService.wrapParams(opts, { uid, action: 'deleteMany' });
 
-      const ctx = strapi.requestContext.get()
-      const { id: authId, strategy: authStrategy } = getSoftDeletedByAuth(ctx.state.auth)
+      const ctx = strapi.requestContext.get();
+      const { id: authId, strategy: authStrategy } = getSoftDeletedByAuth(ctx.state.auth);
 
-      const entitiesToDelete = await defaultService.findMany(uid, wrappedParams)
-      const deletedEntities: any[] = []
+      // TODO: Optimize decoratedService.deleteMany to use a single query?
+      const entitiesToDelete: any[] = await defaultService.findMany(uid, wrappedParams);
+      const deletedEntities: any[] = [];
       for (let entityToDelete of entitiesToDelete) {
         const deletedEntity = await defaultService.update(uid, entityToDelete.id, {
           data: {
@@ -129,13 +130,13 @@ export default async ({ strapi }: { strapi: Strapi & { admin: any } }) => {
             _softDeletedById: authId,
             _softDeletedByType: authStrategy,
           },
-        })
+        });
         if (deletedEntity) {
-          deletedEntities.push(deletedEntity)
+          deletedEntities.push(deletedEntity);
         }
       }
 
-      return deletedEntities
+      return deletedEntities;
     },
 
     findOne: async (uid: string, id: number, opts: any) => {
@@ -148,7 +149,7 @@ export default async ({ strapi }: { strapi: Strapi & { admin: any } }) => {
         where: {
           id,
           _softDeletedAt: {
-            $null: true
+            $null: true,
           },
         },
       });
@@ -161,7 +162,7 @@ export default async ({ strapi }: { strapi: Strapi & { admin: any } }) => {
     },
 
     wrapParams: async (opts: any, ctx: { uid: string, action: string }) => {
-      return await sdWrapParams(defaultService, opts, ctx)
+      return await sdWrapParams(defaultService, opts, ctx);
     },
   }));
 };

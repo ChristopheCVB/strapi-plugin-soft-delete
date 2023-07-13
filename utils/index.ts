@@ -1,3 +1,3 @@
-export * as plugin from './plugin'
+export * as plugin from './plugin';
 
-export * from './uidMatcher'
+export * from './uidMatcher';

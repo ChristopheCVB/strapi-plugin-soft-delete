@@ -1,10 +1,10 @@
 import { plugin } from "../../utils";
 
 export const getSoftDeletedByAuth = (auth: any) => {
-  const id: number | null = auth.credentials?.id || null
-  const strategy: 'admin' | 'users-permissions' | 'api-token' | 'transfer-token' | string = auth.strategy.name
+  const id: number | null = auth.credentials?.id || null;
+  const strategy: 'admin' | 'users-permissions' | 'api-token' | 'transfer-token' | string = auth.strategy.name;
 
-  return { id, strategy }
+  return { id, strategy };
 };
 
 export const getService = (name: string) => {
