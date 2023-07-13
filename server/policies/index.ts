@@ -1,9 +1,9 @@
-import canRead from './canRead';
-import canRestore from './canRestore';
-import canDeletePermanently from './canDeletePermanently';
+import adminCanRead from './adminCanRead';
+import adminCanRestore from './adminCanRestore';
+import adminCanDeletePermanently from './adminCanDeletePermanently';
 
 export default {
-  canRead,
-  canRestore,
-  canDeletePermanently,
+  adminCanRead,
+  adminCanRestore,
+  adminCanDeletePermanently,
 };

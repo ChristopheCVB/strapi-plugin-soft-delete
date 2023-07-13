@@ -1,6 +1,6 @@
 import { Strapi } from '@strapi/strapi';
-import { pluginId } from '../../utils/plugin'
-import { getSoftDeletedBy } from '../utils';
+import { plugin } from '../../utils'
+import { getSoftDeletedByAuth } from '../utils';
 
 declare type SoftDeletedBy = {
   id?: number;
@@ -8,48 +8,48 @@ declare type SoftDeletedBy = {
   name?: string;
 }
 
+const getSoftDeletedByEntry = async (entry: any) => {
+  const _softDeletedBy: SoftDeletedBy = {
+    id: entry._softDeletedById,
+    type: entry._softDeletedByType,
+  }
+  if (entry._softDeletedById && entry._softDeletedByType) {
+    try {
+      switch (entry._softDeletedByType) {
+        case 'admin':
+          const adminUser = await strapi.entityService.findOne('admin::user', entry._softDeletedById)
+          _softDeletedBy.name = adminUser.username || (adminUser.firstname || adminUser.lastname ? adminUser.firstname + ' ' + adminUser.lastname : false) || adminUser.email;
+          break;
+
+        case 'api-token':
+          const apiToken = await strapi.entityService.findOne('admin::api-token', entry._softDeletedById);
+          _softDeletedBy.name = apiToken.name;
+          break;
+
+        case 'transfer-token':
+          const transferToken = await strapi.entityService.findOne('admin::transfer-token', entry._softDeletedById);
+          _softDeletedBy.name = transferToken.name;
+          break;
+
+        case 'users-premissions':
+          const user = await strapi.entityService.findOne('plugin::users-permissions.user', entry._softDeletedById);
+          _softDeletedBy.name = user.username || user.email;
+          break;
+      }
+    } catch (error) {}
+  }
+  return _softDeletedBy;
+};
+
 export default ({ strapi }: { strapi: Strapi }) => ({
   pluginStore: strapi.store({
     environment: strapi.config.environment,
     type: 'plugin',
-    name: pluginId,
+    name: plugin.pluginId,
   }),
 
-  getSoftDeletedByEntry: async (entry: any) => {
-    const _softDeletedBy: SoftDeletedBy = {
-      id: entry._softDeletedById,
-      type: entry._softDeletedByType,
-    }
-    if (entry._softDeletedById && entry._softDeletedByType) {
-      try {
-        switch (entry._softDeletedByType) {
-          case 'admin':
-            const adminUser = await strapi.entityService.findOne('admin::user', entry._softDeletedById)
-            _softDeletedBy.name = adminUser.username;
-            break;
-
-          case 'api-token':
-            const apiToken = await strapi.entityService.findOne('admin::api-token', entry._softDeletedById);
-            _softDeletedBy.name = apiToken.name;
-            break;
-
-          case 'transfer-token':
-            const transferToken = await strapi.entityService.findOne('admin::transfer-token', entry._softDeletedById);
-            _softDeletedBy.name = transferToken.name;
-            break;
-
-          case 'users-premissions':
-            const user = await strapi.entityService.findOne('plugin::users-permissions.user', entry._softDeletedById);
-            _softDeletedBy.name = user.username || user.email || user.id;
-            break;
-        }
-      } catch (error) {}
-    }
-    return _softDeletedBy;
-  },
-
   async findOne(ctx) {
-    const entity = await strapi.query(ctx.params.uid).findOne({
+    const entry = await strapi.query(ctx.params.uid).findOne({
       select: '*',
       where: {
         id: ctx.params.id,
@@ -60,8 +60,10 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     });
 
     return {
-      ...entity,
-      _softDeletedBy: await this.getSoftDeletedByEntry(entity),
+      ...entry,
+      _softDeletedById: undefined,
+      _softDeletedByType: undefined,
+      _softDeletedBy: await getSoftDeletedByEntry(entry),
     }
   },
 
@@ -79,7 +81,9 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     })).map(async (entry) => {
       return {
         ...entry,
-        _softDeletedBy: await this.getSoftDeletedByEntry(entry),
+        _softDeletedById: undefined,
+        _softDeletedByType: undefined,
+        _softDeletedBy: await getSoftDeletedByEntry(entry),
       }
     }));
   },
@@ -101,7 +105,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       publishedAt = null;
     }
 
-    const result = await strapi.query(ctx.params.uid).update({
+    const entry = await strapi.query(ctx.params.uid).update({
       select: '*',
       where: {
         id: ctx.params.id,
@@ -117,7 +121,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     if (ctx.params.kind === 'singleType') {
       switch (pluginSettings.singleTypesRestorationBehavior) {
         case 'soft-delete':
-          const {authId, authStrategy} = getSoftDeletedBy(ctx);
+          const {id: authId, strategy: authStrategy} = getSoftDeletedByAuth(ctx.state.auth);
           await strapi.query(ctx.params.uid).update({
             where: {
               id: {
@@ -144,7 +148,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       }
     }
 
-    return result;
+    return entry;
   },
 
   async deleteMany(ctx) {
@@ -164,7 +168,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       publishedAt = null;
     }
 
-    const result = await strapi.query(ctx.params.uid).updateMany({
+    const entries = await strapi.query(ctx.params.uid).updateMany({
       select: '*',
       where: {
         id: ctx.request.body.data.ids,
@@ -178,7 +182,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     });
 
     if (ctx.params.kind === 'singleType') {
-      const {authId, authStrategy} = getSoftDeletedBy(ctx);
+      const {id: authId, strategy: authStrategy} = getSoftDeletedByAuth(ctx.state.auth);
       switch (pluginSettings.singleTypesRestorationBehavior) {
         case 'soft-delete':
           await strapi.query(ctx.params.uid).updateMany({
@@ -207,7 +211,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       }
     }
 
-    return result;
+    return entries;
   },
 
   async getSettings() {

@@ -1,7 +1,6 @@
 import { Strapi } from '@strapi/strapi';
-import { uidMatcher } from "../utils";
-import { pluginId } from "../utils/plugin";
-import { getSoftDeletedBy } from "./utils";
+import { uidMatcher, plugin } from "../utils";
+import { getSoftDeletedByAuth } from "./utils";
 
 const sdWrapParams = async (defaultService: any, opts: any, ctx: { uid: string, action: string }) => {
   const { uid, action } = ctx
@@ -32,7 +31,7 @@ export default async ({ strapi }: { strapi: Strapi & { admin: any } }) => {
   const pluginStore = strapi.store({
     environment: strapi.config.environment,
     type: 'plugin',
-    name: pluginId,
+    name: plugin.pluginId,
   });
   const pluginStoreSettings = await pluginStore.get({ key: 'settings' });
   if (!pluginStoreSettings || !pluginStoreSettings.singleTypesRestorationBehavior || !pluginStoreSettings.draftPublishRestorationBehavior) {
@@ -50,14 +49,14 @@ export default async ({ strapi }: { strapi: Strapi & { admin: any } }) => {
   strapi.admin.services.permission.actionProvider.register({
     uid: 'read',
     displayName: 'Read',
-    pluginName: pluginId,
+    pluginName: plugin.pluginId,
     section: 'plugins',
   });
 
   strapi.admin.services.permission.actionProvider.register({
     uid: 'settings',
     displayName: 'Settings',
-    pluginName: pluginId,
+    pluginName: plugin.pluginId,
     section: 'plugins',
   });
 
@@ -66,7 +65,7 @@ export default async ({ strapi }: { strapi: Strapi & { admin: any } }) => {
     options: { applyToProperties: [ 'locales' ] },
     section: 'contentTypes',
     displayName: 'Deleted Read',
-    pluginName: pluginId,
+    pluginName: plugin.pluginId,
     subjects: contentTypeUids,
   });
 
@@ -75,7 +74,7 @@ export default async ({ strapi }: { strapi: Strapi & { admin: any } }) => {
     options: { applyToProperties: [ 'locales' ] },
     section: 'contentTypes',
     displayName: 'Deleted Restore',
-    pluginName: pluginId,
+    pluginName: plugin.pluginId,
     subjects: contentTypeUids,
   });
 
@@ -84,7 +83,7 @@ export default async ({ strapi }: { strapi: Strapi & { admin: any } }) => {
     options: { applyToProperties: [ 'locales' ] },
     section: 'contentTypes',
     displayName: 'Delete Permanently',
-    pluginName: pluginId,
+    pluginName: plugin.pluginId,
     subjects: contentTypeUids,
   });
 
@@ -98,7 +97,7 @@ export default async ({ strapi }: { strapi: Strapi & { admin: any } }) => {
       const wrappedParams = await defaultService.wrapParams(opts, { uid, action: 'delete' })
 
       const ctx = strapi.requestContext.get()
-      const { authId, authStrategy } = getSoftDeletedBy(ctx)
+      const { id: authId, strategy: authStrategy } = getSoftDeletedByAuth(ctx.state.auth)
 
       return await defaultService.update(uid, id, {
         ...wrappedParams,
@@ -119,7 +118,7 @@ export default async ({ strapi }: { strapi: Strapi & { admin: any } }) => {
       const wrappedParams = await defaultService.wrapParams(opts, { uid, action: 'deleteMany' })
 
       const ctx = strapi.requestContext.get()
-      const { authId, authStrategy } = getSoftDeletedBy(ctx)
+      const { id: authId, strategy: authStrategy } = getSoftDeletedByAuth(ctx.state.auth)
 
       const entitiesToDelete = await defaultService.findMany(uid, wrappedParams)
       const deletedEntities: any[] = []

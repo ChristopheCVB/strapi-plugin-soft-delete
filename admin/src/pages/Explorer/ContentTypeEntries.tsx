@@ -6,7 +6,7 @@
 
 import type { ContentManagerConfigurationResponse, ContentTypeNavLink, ContentTypeEntry, Permission } from './types';
 
-import { pluginId } from '../../../../utils/plugin';
+import { plugin } from '../../../../utils';
 import getTrad from '../../utils/getTrad';
 
 import React, { useEffect, useState } from 'react';
@@ -58,11 +58,11 @@ const ContentTypeEntries: React.FunctionComponent<Props> = ({contentType}) => {
   const [alert, setAlert] = useState<{variant: 'success' | 'danger', message: string} | undefined>(undefined);
 
   const canRestore = allPermissions.some(permission =>
-    permission.action === `plugin::${pluginId}.explorer.restore` &&
+    permission.action === `plugin::${plugin.pluginId}.explorer.restore` &&
     permission.subject === contentType?.uid
   );
   const canDeletePermanantly = allPermissions.some(permission =>
-    permission.action === `plugin::${pluginId}.explorer.delete-permanently` &&
+    permission.action === `plugin::${plugin.pluginId}.explorer.delete-permanently` &&
     permission.subject === contentType?.uid
   );
   const canReadMainField = mainField && allPermissions.some(permission =>
@@ -87,7 +87,7 @@ const ContentTypeEntries: React.FunctionComponent<Props> = ({contentType}) => {
         setLoadingError(error);
       });
 
-    get(`/${pluginId}/${contentType.kind}/${contentType.uid}`)
+    get(`/${plugin.pluginId}/${contentType.kind}/${contentType.uid}`)
       .then((response: { data: ContentTypeEntry[] }) => {
         setEntries(response.data);
       })
@@ -106,7 +106,7 @@ const ContentTypeEntries: React.FunctionComponent<Props> = ({contentType}) => {
 
     setAlert(undefined);
     setIsRestoring(true);
-    put(`/${pluginId}/${contentType?.kind}/${contentType?.uid}/restore`, {
+    put(`/${plugin.pluginId}/${contentType?.kind}/${contentType?.uid}/restore`, {
       data: {
         ids: restoreModalEntriesId,
       },
@@ -141,7 +141,7 @@ const ContentTypeEntries: React.FunctionComponent<Props> = ({contentType}) => {
 
     setAlert(undefined);
     setIsDeletingPermanently(true);
-    put(`/${pluginId}/${contentType?.kind}/${contentType?.uid}/delete`, {
+    put(`/${plugin.pluginId}/${contentType?.kind}/${contentType?.uid}/delete`, {
       data: {
         ids: deletePermanentlyModalEntriesId,
       }
@@ -179,7 +179,7 @@ const ContentTypeEntries: React.FunctionComponent<Props> = ({contentType}) => {
       {!isLoading && !loadingError && contentType && (
         <BaseHeaderLayout
           navigationAction={
-            <Link startIcon={<ArrowLeft />} to={`/plugins/${pluginId}`}>
+            <Link startIcon={<ArrowLeft />} to={`/plugins/${plugin.pluginId}`}>
               {formatMessage({id: getTrad('back'), defaultMessage: 'Back'})}
             </Link>
           }
@@ -307,7 +307,7 @@ const ContentTypeEntries: React.FunctionComponent<Props> = ({contentType}) => {
                     </Td>
                     <Td>
                       <Typography textColor="neutral800">
-                        {entry._softDeletedBy?.name || entry._softDeletedBy?.id || "-"}&nbsp;({entry._softDeletedBy.type})
+                        {entry._softDeletedBy.name || entry._softDeletedBy.id || "-"}&nbsp;({entry._softDeletedBy.type})
                       </Typography>
                     </Td>
                     {mainField && mainField != "id" && canReadMainField && (

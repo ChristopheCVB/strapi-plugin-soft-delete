@@ -2,7 +2,7 @@ export default [
   {
     method: 'GET',
     path: '/settings',
-    handler: 'controller.getSettings',
+    handler: 'admin.getSettings',
     config: {
       policies: ['admin::isAuthenticatedAdmin'],
     },
@@ -10,7 +10,7 @@ export default [
   {
     method: 'PUT',
     path: '/settings',
-    handler: 'controller.setSettings',
+    handler: 'admin.setSettings',
     config: {
       policies: ['admin::isAuthenticatedAdmin'],
     },

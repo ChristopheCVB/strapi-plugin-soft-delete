@@ -19,7 +19,7 @@ import {
 } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
 
-import { pluginId } from '../../../../../utils/plugin';
+import { plugin } from '../../../../../utils';
 import getTrad from '../../../utils/getTrad';
 
 import { useFetchClient } from '@strapi/helper-plugin';
@@ -69,7 +69,7 @@ const RestorationBehavior: React.FunctionComponent = () => {
 
   useEffect(() => {
     setIsLoading(true);
-    get(`/${pluginId}/settings`).catch((error: Error) => {
+    get(`/${plugin.pluginId}/settings`).catch((error: Error) => {
       setAlert({
         variant: 'danger',
         message: formatMessage({id: getTrad('settings.load.error'), defaultMessage: 'Error while loading Settings'}),
@@ -86,7 +86,7 @@ const RestorationBehavior: React.FunctionComponent = () => {
 
   const save = () => {
     setIsLoading(true);
-    put(`/${pluginId}/settings`, {
+    put(`/${plugin.pluginId}/settings`, {
       singleTypesRestorationBehavior,
       draftPublishRestorationBehavior,
     }).catch((error: Error) => {

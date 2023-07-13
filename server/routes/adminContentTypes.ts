@@ -2,49 +2,49 @@ export default [
   {
     method: 'GET',
     path: '/:kind/:uid',
-    handler: 'controller.findMany',
+    handler: 'admin.findMany',
     config: {
-      policies: ['canRead'],
+      policies: ['adminCanRead'],
     },
   },
   {
     method: 'GET',
     path: '/:kind/:uid/:id',
-    handler: 'controller.findOne',
+    handler: 'admin.findOne',
     config: {
-      policies: ['canRead'],
+      policies: ['adminCanRead'],
     },
   },
   {
     method: 'DELETE',
     path: '/:kind/:uid/:id/delete',
-    handler: 'controller.delete',
+    handler: 'admin.delete',
     config: {
-      policies: ['canDeletePermanently'],
+      policies: ['adminCanDeletePermanently'],
     },
   },
   {
     method: 'PUT',
     path: '/:kind/:uid/:id/restore',
-    handler: 'controller.restore',
+    handler: 'admin.restore',
     config: {
-      policies: ['canRestore'],
+      policies: ['adminCanRestore'],
     },
   },
   {
     method: 'PUT',
     path: '/:kind/:uid/delete',
-    handler: 'controller.deleteMany',
+    handler: 'admin.deleteMany',
     config: {
-      policies: ['canDeletePermanently'],
+      policies: ['adminCanDeletePermanently'],
     },
   },
   {
     method: 'PUT',
     path: '/:kind/:uid/restore',
-    handler: 'controller.restoreMany',
+    handler: 'admin.restoreMany',
     config: {
-      policies: ['canRestore'],
+      policies: ['adminCanRestore'],
     },
   },
 ];

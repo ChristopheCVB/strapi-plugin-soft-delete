@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { pluginId } from '../../../../utils/plugin';
+import { plugin } from '../../../../utils';
 import {
   Box,
   Layout,
@@ -67,7 +67,7 @@ const Explorer: React.FunctionComponent = () => {
           // Filter out content types that the user doesn't have the permission to access
           .filter(contentType =>
             allPermissions.some(permission =>
-              permission.action === `plugin::${pluginId}.explorer.read` &&
+              permission.action === `plugin::${plugin.pluginId}.explorer.read` &&
               permission.subject === contentType.uid
             )
           )
@@ -75,7 +75,7 @@ const Explorer: React.FunctionComponent = () => {
             uid: contentType.uid,
             kind: contentType.kind,
             label: contentType.info.displayName,
-            to: `/plugins/${pluginId}/collectionType/${contentType.uid}`,
+            to: `/plugins/${plugin.pluginId}/collectionType/${contentType.uid}`,
           }));
 
         const singleTypeNavLinks = (response.data.data.contentTypes as ContentType[])
@@ -88,7 +88,7 @@ const Explorer: React.FunctionComponent = () => {
           // Filter out content types that the user doesn't have the permission to access
           .filter(contentType =>
             allPermissions.some(permission =>
-              permission.action === `plugin::${pluginId}.explorer.read` &&
+              permission.action === `plugin::${plugin.pluginId}.explorer.read` &&
               permission.subject === contentType.uid
             )
           )
@@ -96,7 +96,7 @@ const Explorer: React.FunctionComponent = () => {
             uid: contentType.uid,
             kind: contentType.kind,
             label: contentType.info.displayName,
-            to: `/plugins/${pluginId}/singleType/${contentType.uid}`,
+            to: `/plugins/${plugin.pluginId}/singleType/${contentType.uid}`,
           }));
 
         setContentTypeNavLinks(collectionTypeNavLinks.concat(singleTypeNavLinks));
@@ -112,7 +112,7 @@ const Explorer: React.FunctionComponent = () => {
   useEffect(() => {
     const firstContentTypeNavLink = contentTypeNavLinks[0];
     if (firstContentTypeNavLink && (!params.kind || !params.uid)) {
-      history.push(`/plugins/${pluginId}/${firstContentTypeNavLink.kind}/${firstContentTypeNavLink.uid}`);
+      history.push(`/plugins/${plugin.pluginId}/${firstContentTypeNavLink.kind}/${firstContentTypeNavLink.uid}`);
     }
     else if (params.kind && params.uid) {
       setActiveContentType(

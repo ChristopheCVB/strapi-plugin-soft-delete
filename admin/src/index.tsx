@@ -1,5 +1,5 @@
 import { prefixPluginTranslations } from '@strapi/helper-plugin';
-import { pluginId, name } from '../../utils/plugin';
+import { plugin } from '../../utils';
 import PluginIcon from './components/PluginIcon';
 import getTrad from './utils/getTrad';
 import permissions from './permissions';
@@ -7,11 +7,11 @@ import permissions from './permissions';
 export default {
   register(app: any) {
     app.addMenuLink({
-      to: `/plugins/${pluginId}`,
+      to: `/plugins/${plugin.pluginId}`,
       icon: PluginIcon,
       intlLabel: {
-        id: `${pluginId}.name`,
-        defaultMessage: name,
+        id: `${plugin.pluginId}.name`,
+        defaultMessage: plugin.name,
       },
       Component: async () => {
         const component = await import(/* webpackChunkName: "[request]" */ './pages/App');
@@ -22,12 +22,12 @@ export default {
     });
 
     app.createSettingSection(
-      { id: pluginId, intlLabel: { id: getTrad('name'), defaultMessage: 'Soft Delete' } },
+      { id: plugin.pluginId, intlLabel: { id: getTrad('name'), defaultMessage: 'Soft Delete' } },
       [
         {
           intlLabel: { id: getTrad('setting.restorationBehavior'), defaultMessage: 'Restoration Behavior' },
-          id: `${pluginId}.setting.restorationBehavior`,
-          to: `/settings/${pluginId}/restoration-behavior`,
+          id: `${plugin.pluginId}.setting.restorationBehavior`,
+          to: `/settings/${plugin.pluginId}/restoration-behavior`,
           Component: async () => {
             const component = await import(/* webpackChunkName: "[request]" */ './pages/Settings/RestorationBehavior');
 
@@ -39,8 +39,8 @@ export default {
     );
 
     app.registerPlugin({
-      id: pluginId,
-      name,
+      id: plugin.pluginId,
+      name: plugin.name,
     });
   },
 
@@ -54,7 +54,7 @@ export default {
         return import(`./translations/${locale}.json`)
           .then(({ default: data }) => {
             return {
-              data: prefixPluginTranslations(data, pluginId),
+              data: prefixPluginTranslations(data, plugin.pluginId),
               locale,
             };
           })

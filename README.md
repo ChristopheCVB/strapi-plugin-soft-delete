@@ -50,9 +50,9 @@ A plugin for [Strapi Headless CMS](https://github.com/strapi/strapi) that provid
 
 | Section | Permission | Description |
 | ---------- | ---------- | ----------- |
-| Collection Type & Single Type | `Deleted Read` | Allows the admin role to view the soft deleted entries. |
-| Collection Type & Single Type | `Deleted Restore` | Allows the admin role to restore the soft deleted entries. |
-| Collection Type & Single Type | `Delete Permanently` | Allows the admin role to delete permanently the soft deleted entries. |
+| Collection & Single Types | `Deleted Restore` | Allows the admin role to restore the soft deleted entries. |
+| Collection & Single Types | `Deleted Read` | Allows the admin role to view the soft deleted entries. |
+| Collection & Single Types | `Delete Permanently` | Allows the admin role to delete permanently the soft deleted entries. |
 | Plugins | `Read` | Allows the admin role to view the Soft Delete item in the Admin left Panel. |
 | Plugins | `Settings` | Allows the admin role to view the Soft Delete plugin settings. |
 
@@ -60,8 +60,8 @@ A plugin for [Strapi Headless CMS](https://github.com/strapi/strapi) that provid
 
 | Strapi Version | Plugin Version |
 | -------------- | -------------- |
-| v4             | 1.0.0          |
-| v3             | Not Supported  |
+| ^4.11          | 1.0.0          | <!-- FIXME: From which Strapi v4 does the plugin work -->
+| ^3             | Not Supported  |
 
 > This plugin is designed for **Strapi v4** and will not work with v3.x.
 
