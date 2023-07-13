@@ -143,22 +143,21 @@ export default async ({ strapi }: { strapi: Strapi & { admin: any } }) => {
         return await defaultService.findOne(uid, id, opts);
       }
 
-      const wrappedParams = await defaultService.wrapParams(opts, { uid, action: 'findOne' })
-
-      const entities = await defaultService.findMany(uid, {
-        ...wrappedParams,
-        filters: {
+      // Because of other plugins, like i18n, we need to use the findMany method to ignore upstream filters
+      const entities = await strapi.query(uid).findMany({
+        where: {
           id,
           _softDeletedAt: {
             $null: true
-          }
-        }
+          },
+        },
       });
 
       if (entities.length === 0) {
         return null;
       }
-      return entities[0];
+      // And then use the defaultService findOne method to apply the upstream filters and not break the decorate pattern chain
+      return defaultService.findOne(uid, id, opts);
     },
 
     wrapParams: async (opts: any, ctx: { uid: string, action: string }) => {
