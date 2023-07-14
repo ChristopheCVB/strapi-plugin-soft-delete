@@ -6,14 +6,12 @@
 
 import type { ContentManagerConfigurationResponse, ContentTypeNavLink, ContentTypeEntry, Permission } from './types';
 
-import { plugin } from '../../../../utils';
-import getTrad from '../../utils/getTrad';
-
 import React, { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
-import { useFetchClient, useRBACProvider } from '@strapi/helper-plugin';
+
 import parseISO from 'date-fns/parseISO';
 
+import { useFetchClient, useRBACProvider } from '@strapi/helper-plugin';
 import {
   BaseHeaderLayout,
   ContentLayout,
@@ -38,6 +36,9 @@ import {
   Alert,
 } from '@strapi/design-system';
 import { Trash, ArrowLeft, Refresh, EmptyDocuments, EmptyPermissions } from '@strapi/icons';
+
+import { plugin } from '../../../../utils';
+import getTrad from '../../utils/getTrad';
 
 declare type Props = {
   contentType?: ContentTypeNavLink;

@@ -1,6 +1,8 @@
 import { sanitize } from '@strapi/utils'
 import { plugin } from "../../utils";
 
+declare var strapi; // global strapi variable
+
 export const getSoftDeletedByAuth = (auth: any) => {
   const id: number | null = auth.credentials?.id || null;
   const strategy: 'admin' | 'users-permissions' | 'api-token' | 'transfer-token' | string = auth.strategy.name;

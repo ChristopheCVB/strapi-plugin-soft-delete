@@ -4,7 +4,18 @@
  *
  */
 
+import type {
+  ContentManagerInitResponse,
+  ContentType,
+  ContentTypeNavLink,
+  Permission,
+} from './types';
+
 import React, { useState, useEffect } from 'react';
+import { useHistory, useParams } from 'react-router-dom';
+import { useIntl } from 'react-intl';
+
+import { useFetchClient, useRBACProvider } from '@strapi/helper-plugin';
 import {
   Box,
   Layout,
@@ -18,21 +29,9 @@ import {
   Typography,
 } from '@strapi/design-system';
 
-import { useHistory, useParams } from 'react-router-dom';
-import { useFetchClient } from '@strapi/helper-plugin';
-import { useIntl } from 'react-intl';
-
-import { useRBACProvider } from '@strapi/helper-plugin';
-
 import getTrad from '../../utils/getTrad';
 import { plugin } from '../../../../utils';
 
-import type {
-  ContentManagerInitResponse,
-  ContentType,
-  ContentTypeNavLink,
-  Permission,
-} from './types';
 import ContentTypeEntries from './ContentTypeEntries';
 
 const Explorer: React.FunctionComponent = () => {
