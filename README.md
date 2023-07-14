@@ -139,6 +139,7 @@ Feel free to fork and make a PR if you want to add something or fix a bug.
   - [x] Admin Routes
   - [x] Single Type entry restore special case
   - [x] Draft & Publish support when restoring an entry
+  - [x] Audit Logs support
   - [ ] Custom Lifecycle Hooks
   - [ ] Handle Soft Deleting Components
   - [ ] Add tests

@@ -1,6 +1,6 @@
 import { Strapi } from '@strapi/strapi';
 import { plugin } from '../../utils'
-import { getSoftDeletedByAuth } from '../utils';
+import { getSoftDeletedByAuth, eventHubEmit } from '../utils';
 
 declare type SoftDeletedBy = {
   id?: number;
@@ -89,11 +89,15 @@ export default ({ strapi }: { strapi: Strapi }) => ({
   },
 
   delete(ctx) {
-    return strapi.query(ctx.params.uid).delete({
+    const entity = strapi.query(ctx.params.uid).delete({
       where: {
         id: ctx.params.id,
       },
     });
+
+    eventHubEmit('entry.delete', 'delete-permanently', ctx.params.uid, entity);
+
+    return entity;
   },
 
   async restore(ctx) {
@@ -116,16 +120,31 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       },
     });
 
+    eventHubEmit('entry.update', 'restore', ctx.params.uid, entry);
+
+    if (strapi.contentTypes[ctx.params.uid].options?.draftAndPublish && pluginSettings.draftPublishRestorationBehavior === 'draft') {
+      if (entry.publishedAt !== null) {
+        eventHubEmit('entry.unpublish', 'restore', ctx.params.uid, {...entry, publishedAt: null});
+      }
+    }
+
     if (ctx.params.kind === 'singleType') {
+      const notTargettedEntriesWhere = {
+        id: {
+          $ne: ctx.params.id,
+        },
+        _softDeletedAt: null,
+      };
+      const notTargettedEntries = await strapi.query(ctx.params.uid).findMany({
+        select: '*',
+        where: notTargettedEntriesWhere,
+      });
+
       switch (pluginSettings.singleTypesRestorationBehavior) {
         case 'soft-delete':
           const {id: authId, strategy: authStrategy} = getSoftDeletedByAuth(ctx.state.auth);
-          await strapi.query(ctx.params.uid).update({
-            where: {
-              id: {
-                $ne: ctx.params.id,
-              },
-            },
+          await strapi.query(ctx.params.uid).updateMany({
+            where: notTargettedEntriesWhere,
             data: {
               _softDeletedAt: Date.now(),
               _softDeletedById: authId,
@@ -135,14 +154,17 @@ export default ({ strapi }: { strapi: Strapi }) => ({
           break;
 
         case 'delete-permanently':
-          await strapi.query(ctx.params.uid).delete({
-            where: {
-              id: {
-                $ne: ctx.params.id,
-              },
-            },
+          await strapi.query(ctx.params.uid).deleteMany({
+            where: notTargettedEntriesWhere,
           });
           break;
+      }
+
+      for(const notTargettedEntry of notTargettedEntries ) {
+        eventHubEmit(
+          pluginSettings.singleTypesRestorationBehavior === 'soft-delete' ? 'entry.update' : 'entry.delete',
+          pluginSettings.singleTypesRestorationBehavior,
+          ctx.params.uid, notTargettedEntry);
       }
     }
 
@@ -150,14 +172,35 @@ export default ({ strapi }: { strapi: Strapi }) => ({
   },
 
   async deleteMany(ctx) {
-    return await strapi.query(ctx.params.uid).deleteMany({
+    const entries = await strapi.query(ctx.params.uid).findMany({
+      select: '*',
       where: {
         id: ctx.request.body.data.ids,
       },
     });
+
+    const result = await strapi.query(ctx.params.uid).deleteMany({
+      where: {
+        id: ctx.request.body.data.ids,
+      },
+    });
+
+    for(const entry of entries ) {
+      eventHubEmit('entry.delete', 'delete-permanently', ctx.params.uid, entry);
+    }
+
+    return result;
   },
 
   async restoreMany(ctx) {
+    const entries = await strapi.query(ctx.params.uid).findMany({
+      select: '*',
+      where: {
+        id: ctx.request.body.data.ids,
+      },
+    });
+
+
     const pluginSettings = await this.pluginStore.get({ key: 'settings' });
 
     let publishedAt: undefined | null = undefined;
@@ -165,7 +208,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       publishedAt = null;
     }
 
-    const entries = await strapi.query(ctx.params.uid).updateMany({
+    const result = await strapi.query(ctx.params.uid).updateMany({
       where: {
         id: ctx.request.body.data.ids,
       },
@@ -177,16 +220,33 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       },
     });
 
+    for(const entry of entries ) {
+      eventHubEmit('entry.update', 'restore', ctx.params.uid, entry);
+
+      if (strapi.contentTypes[ctx.params.uid].options?.draftAndPublish && pluginSettings.draftPublishRestorationBehavior === 'draft') {
+        if (entry.publishedAt !== null) {
+          eventHubEmit('entry.unpublish', 'restore', ctx.params.uid, {...entry, publishedAt: null});
+        }
+      }
+    }
+
     if (ctx.params.kind === 'singleType') {
-      const {id: authId, strategy: authStrategy} = getSoftDeletedByAuth(ctx.state.auth);
+      const notTargettedEntriesWhere = {
+        id: {
+          $notIn: ctx.request.body.data.ids,
+        },
+        _softDeletedAt: null,
+      };
+      const notTargettedEntries = await strapi.query(ctx.params.uid).findMany({
+        select: '*',
+        where: notTargettedEntriesWhere,
+      });
+
       switch (pluginSettings.singleTypesRestorationBehavior) {
         case 'soft-delete':
+          const {id: authId, strategy: authStrategy} = getSoftDeletedByAuth(ctx.state.auth);
           await strapi.query(ctx.params.uid).updateMany({
-            where: {
-              id: {
-                $notIn: ctx.request.body.data.ids,
-              },
-            },
+            where: notTargettedEntriesWhere,
             data: {
               _softDeletedAt: Date.now(),
               _softDeletedById: authId,
@@ -197,17 +257,21 @@ export default ({ strapi }: { strapi: Strapi }) => ({
 
         case 'delete-permanently':
           await strapi.query(ctx.params.uid).deleteMany({
-            where: {
-              id: {
-                $notIn: ctx.request.body.data.ids,
-              },
-            },
+            where: notTargettedEntriesWhere,
           });
           break;
       }
+
+      for(const notTargettedEntry of notTargettedEntries ) {
+        eventHubEmit(
+          pluginSettings.singleTypesRestorationBehavior === 'soft-delete' ? 'entry.update' : 'entry.delete',
+          pluginSettings.singleTypesRestorationBehavior,
+          ctx.params.uid, notTargettedEntry
+        );
+      }
     }
 
-    return entries;
+    return result;
   },
 
   async getSettings() {

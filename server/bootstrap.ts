@@ -1,12 +1,19 @@
 import { Strapi } from '@strapi/strapi';
-import { uidMatcher, plugin } from "../utils";
-import { getSoftDeletedByAuth } from "./utils";
+import { plugin } from "../utils";
+import { getSoftDeletedByAuth, eventHubEmit } from "./utils";
 
 const sdWrapParams = async (defaultService: any, opts: any, ctx: { uid: string, action: string }) => {
   const { uid, action } = ctx;
   const wrappedParams = await defaultService.wrapParams(opts, ctx);
-  if (!uidMatcher(uid)) {
+  if (!plugin.supportsContentType(uid)) {
     return wrappedParams;
+  }
+
+  // Prevent users to set values for _softDeletedAt, _softDeletedById, and _softDeletedByType
+  if (wrappedParams.data) {
+    delete wrappedParams.data._softDeletedAt;
+    delete wrappedParams.data._softDeletedById;
+    delete wrappedParams.data._softDeletedByType;
   }
 
   return {
@@ -45,7 +52,7 @@ export default async ({ strapi }: { strapi: Strapi & { admin: any } }) => {
   // Setup Permissions
   strapi.admin.services.permission.actionProvider.get('plugin::content-manager.explorer.delete').displayName = 'Soft Delete';
 
-  const contentTypeUids = Object.keys(strapi.contentTypes).filter(uidMatcher);
+  const contentTypeUids = Object.keys(strapi.contentTypes).filter(plugin.supportsContentType);
   strapi.admin.services.permission.actionProvider.register({
     uid: 'read',
     displayName: 'Read',
@@ -87,10 +94,30 @@ export default async ({ strapi }: { strapi: Strapi & { admin: any } }) => {
     subjects: contentTypeUids,
   });
 
+
+  // 'Decorate' Strapi's EventHub to prevent firing 'entry.update' events from soft-delete plugin
+  const defaultEventHubEmit = strapi.eventHub.emit;
+  strapi.eventHub.emit = async (event: string, ...args) => {
+    const data = args[0];
+    if (event === 'entry.update' && data.plugin?.id !== plugin.pluginId) {
+      const entry = await strapi.query(data.uid).findOne({
+        select: 'id', // Just select the id, we just need to know if it exists
+        where: {
+          id: data.entry.id,
+          _softDeletedAt: null
+        }
+      });
+      if (!entry) {
+        return;
+      }
+    }
+    await defaultEventHubEmit(event, ...args);
+  };
+
   // Decorate Entity Services
   strapi.entityService.decorate((defaultService) => ({
     delete: async (uid: string, id: number, opts: any) => {
-      if (!uidMatcher(uid)) {
+      if (!plugin.supportsContentType(uid)) {
         return await defaultService.delete(uid, id, opts);
       }
 
@@ -99,7 +126,7 @@ export default async ({ strapi }: { strapi: Strapi & { admin: any } }) => {
       const ctx = strapi.requestContext.get();
       const { id: authId, strategy: authStrategy } = getSoftDeletedByAuth(ctx.state.auth);
 
-      return await defaultService.update(uid, id, {
+      const entity = await defaultService.update(uid, id, {
         ...wrappedParams,
         data: {
           ...wrappedParams.data,
@@ -108,10 +135,14 @@ export default async ({ strapi }: { strapi: Strapi & { admin: any } }) => {
           _softDeletedByType: authStrategy,
         },
       });
+
+      eventHubEmit('entry.delete', 'soft-delete', uid, entity); // FIXME: Should this be entry.update?
+
+      return entity;
     },
 
     deleteMany: async (uid: string, opts: any) => {
-      if (!uidMatcher(uid)) {
+      if (!plugin.supportsContentType(uid)) {
         return await defaultService.deleteMany(uid, opts);
       }
 
@@ -134,13 +165,14 @@ export default async ({ strapi }: { strapi: Strapi & { admin: any } }) => {
         if (deletedEntity) {
           deletedEntities.push(deletedEntity);
         }
+        eventHubEmit('entry.delete', 'soft-delete', uid, deletedEntity); // FIXME: Should this be entry.update?
       }
 
       return deletedEntities;
     },
 
     findOne: async (uid: string, id: number, opts: any) => {
-      if (!uidMatcher(uid)) {
+      if (!plugin.supportsContentType(uid)) {
         return await defaultService.findOne(uid, id, opts);
       }
 

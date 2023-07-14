@@ -5,7 +5,6 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { plugin } from '../../../../utils';
 import {
   Box,
   Layout,
@@ -21,12 +20,12 @@ import {
 
 import { useHistory, useParams } from 'react-router-dom';
 import { useFetchClient } from '@strapi/helper-plugin';
-import { uidMatcher } from '../../../../utils';
 import { useIntl } from 'react-intl';
 
 import { useRBACProvider } from '@strapi/helper-plugin';
 
 import getTrad from '../../utils/getTrad';
+import { plugin } from '../../../../utils';
 
 import type {
   ContentManagerInitResponse,
@@ -62,7 +61,7 @@ const Explorer: React.FunctionComponent = () => {
           .filter(contentType =>
             contentType.isDisplayed &&
             contentType.kind === 'collectionType' &&
-            uidMatcher(contentType.uid)
+            plugin.supportsContentType(contentType.uid)
           )
           // Filter out content types that the user doesn't have the permission to access
           .filter(contentType =>
@@ -83,7 +82,7 @@ const Explorer: React.FunctionComponent = () => {
           .filter(contentType =>
             contentType.isDisplayed &&
             contentType.kind === 'singleType' &&
-            uidMatcher(contentType.uid)
+            plugin.supportsContentType(contentType.uid)
           )
           // Filter out content types that the user doesn't have the permission to access
           .filter(contentType =>
