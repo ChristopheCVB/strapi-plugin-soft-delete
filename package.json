@@ -30,22 +30,17 @@
   "devDependencies": {
     "@strapi/typescript-utils": "^4.11.5",
     "@types/react": "^18.2.14",
-    "@types/react-dom": "^18.0.28",
     "@types/react-intl": "^3.0.0",
     "@types/react-router-dom": "^5.3.3",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0",
     "react-intl": "^6.4.4",
     "react-router-dom": "5.3.4",
-    "styled-components": "^5.3.6",
     "typescript": "5.1.6"
   },
   "peerDependencies": {
     "@strapi/strapi": "^4.11.0",
     "react": "^17.0.0 || ^18.0.0",
-    "react-dom": "^17.0.0 || ^18.0.0",
-    "react-router-dom": "^5.3.4",
-    "styled-components": "^5.3.6"
+    "react-router-dom": "^5.3.4"
   },
   "author": {
     "name": "Christophe Carvalho Vilas-Boas",
