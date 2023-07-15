@@ -1,7 +1,7 @@
 import { sanitize } from '@strapi/utils'
 import { plugin } from "../../utils";
 
-declare var strapi; // global strapi variable
+declare const strapi; // global strapi
 
 export const getSoftDeletedByAuth = (auth: any) => {
   const id: number | null = auth.credentials?.id || null;
@@ -14,18 +14,32 @@ export const getService = (name: string) => {
   return strapi.plugin(plugin.pluginId).service(name);
 };
 
-export const eventHubEmit = async (event: 'entry.delete' | 'entry.update' | 'entry.unpublish', action: 'soft-delete' | 'restore' | 'delete-permanently', uid: string, entity: any) => {
-  const modelDef = strapi.getModel(uid);
+declare type CustomEventHubEmit = {
+  uid: string;
+  entity: any;
+} & ({
+  event: 'entry.delete';
+  action: 'soft-delete' | 'delete-permanently';
+} | {
+  event: 'entry.update';
+  action: 'restore';
+} | {
+  event: 'entry.unpublish';
+  action: 'restore';
+});
+
+export const eventHubEmit = async (params: CustomEventHubEmit) => {
+  const modelDef = strapi.getModel(params.uid);
   const sanitizedEntity = await sanitize.sanitizers.defaultSanitizeOutput(
     modelDef,
-    entity
+    params.entity
   );
-  strapi.eventHub.emit(event, {
+  strapi.eventHub.emit(params.event, {
     model: modelDef.modelName,
-    uid,
+    uid: params.uid,
     plugin: {
       id: plugin.pluginId,
-      action
+      action: params.action
     },
     entry: sanitizedEntity
   });

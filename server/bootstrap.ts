@@ -136,7 +136,12 @@ export default async ({ strapi }: { strapi: Strapi & { admin: any } }) => {
         },
       });
 
-      eventHubEmit('entry.delete', 'soft-delete', uid, entity); // FIXME: Should this be entry.update?
+      eventHubEmit({
+        uid: ctx.params.uid,
+        event: 'entry.delete', // FIXME: Should this be entry.update?
+        action: 'soft-delete',
+        entity: entity,
+      });
 
       return entity;
     },
@@ -165,7 +170,12 @@ export default async ({ strapi }: { strapi: Strapi & { admin: any } }) => {
         if (deletedEntity) {
           deletedEntities.push(deletedEntity);
         }
-        eventHubEmit('entry.delete', 'soft-delete', uid, deletedEntity); // FIXME: Should this be entry.update?
+        eventHubEmit({
+          uid: ctx.params.uid,
+          event: 'entry.delete', // FIXME: Should this be entry.update?
+          action: 'soft-delete',
+          entity: deletedEntity,
+        });
       }
 
       return deletedEntities;

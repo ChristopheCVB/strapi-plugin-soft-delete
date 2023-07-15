@@ -95,7 +95,12 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       },
     });
 
-    eventHubEmit('entry.delete', 'delete-permanently', ctx.params.uid, entity);
+    eventHubEmit({
+      uid: ctx.params.uid,
+      event: 'entry.delete',
+      action: 'delete-permanently',
+      entity,
+    });
 
     return entity;
   },
@@ -120,11 +125,21 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       },
     });
 
-    eventHubEmit('entry.update', 'restore', ctx.params.uid, entry);
+    eventHubEmit({
+      uid: ctx.params.uid,
+      event: 'entry.update',
+      action: 'restore',
+      entity: entry,
+    });
 
     if (strapi.contentTypes[ctx.params.uid].options?.draftAndPublish && pluginSettings.draftPublishRestorationBehavior === 'draft') {
       if (entry.publishedAt !== null) {
-        eventHubEmit('entry.unpublish', 'restore', ctx.params.uid, {...entry, publishedAt: null});
+        eventHubEmit({
+          uid: ctx.params.uid,
+          event: 'entry.unpublish',
+          action: 'restore',
+          entity: {...entry, publishedAt: null},
+        });
       }
     }
 
@@ -161,10 +176,12 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       }
 
       for(const notTargettedEntry of notTargettedEntries ) {
-        eventHubEmit(
-          pluginSettings.singleTypesRestorationBehavior === 'soft-delete' ? 'entry.update' : 'entry.delete',
-          pluginSettings.singleTypesRestorationBehavior,
-          ctx.params.uid, notTargettedEntry);
+        eventHubEmit({
+          uid: ctx.params.uid,
+          event: pluginSettings.singleTypesRestorationBehavior === 'soft-delete' ? 'entry.update' : 'entry.delete',
+          action: pluginSettings.singleTypesRestorationBehavior,
+          entity: notTargettedEntry,
+        });
       }
     }
 
@@ -186,7 +203,12 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     });
 
     for(const entry of entries ) {
-      eventHubEmit('entry.delete', 'delete-permanently', ctx.params.uid, entry);
+      eventHubEmit({
+        uid: ctx.params.uid,
+        event: 'entry.delete',
+        action: 'delete-permanently',
+        entity: entry,
+      });
     }
 
     return result;
@@ -221,11 +243,21 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     });
 
     for(const entry of entries ) {
-      eventHubEmit('entry.update', 'restore', ctx.params.uid, entry);
+      eventHubEmit({
+        uid: ctx.params.uid,
+        event: 'entry.update',
+        action: 'restore',
+        entity: entry,
+      });
 
       if (strapi.contentTypes[ctx.params.uid].options?.draftAndPublish && pluginSettings.draftPublishRestorationBehavior === 'draft') {
         if (entry.publishedAt !== null) {
-          eventHubEmit('entry.unpublish', 'restore', ctx.params.uid, {...entry, publishedAt: null});
+          eventHubEmit({
+            uid: ctx.params.uid,
+            event: 'entry.unpublish',
+            action: 'restore',
+            entity: {...entry, publishedAt: null},
+          });
         }
       }
     }
@@ -263,11 +295,12 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       }
 
       for(const notTargettedEntry of notTargettedEntries ) {
-        eventHubEmit(
-          pluginSettings.singleTypesRestorationBehavior === 'soft-delete' ? 'entry.update' : 'entry.delete',
-          pluginSettings.singleTypesRestorationBehavior,
-          ctx.params.uid, notTargettedEntry
-        );
+        eventHubEmit({
+          uid: ctx.params.uid,
+          event: pluginSettings.singleTypesRestorationBehavior === 'soft-delete' ? 'entry.update' : 'entry.delete',
+          action: pluginSettings.singleTypesRestorationBehavior,
+          entity: notTargettedEntry,
+        });
       }
     }
 
