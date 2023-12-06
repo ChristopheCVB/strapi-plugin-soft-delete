@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-soft-delete",
-  "version": "0.9.3",
+  "version": "0.9.4",
   "description": "Add a soft delete feature to your project",
   "strapi": {
     "name": "soft-delete",
@@ -21,9 +21,9 @@
     "delete"
   ],
   "dependencies": {
-    "@strapi/design-system": "^1.13.0",
+    "@strapi/design-system": "^1.13.2",
     "@strapi/helper-plugin": "^4.11.5",
-    "@strapi/icons": "^1.8.2",
+    "@strapi/icons": "^1.13.2",
     "@strapi/utils": "^4.11.5",
     "date-fns": "^2.30.0"
   },
