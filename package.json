@@ -21,7 +21,7 @@
     "delete"
   ],
   "dependencies": {
-    "@strapi/design-system": "^1.8.2",
+    "@strapi/design-system": "^1.13.0",
     "@strapi/helper-plugin": "^4.11.5",
     "@strapi/icons": "^1.8.2",
     "@strapi/utils": "^4.11.5",
