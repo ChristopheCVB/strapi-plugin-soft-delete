@@ -1,6 +1,7 @@
 import { Strapi } from '@strapi/strapi';
 import { plugin } from "../utils";
 import { getSoftDeletedByAuth, eventHubEmit } from "./utils";
+import { supportsContentType } from '../utils/plugin';
 
 const sdWrapParams = async (defaultService: any, opts: any, ctx: { uid: string, action: string }) => {
   const { uid, action } = ctx;
@@ -99,7 +100,7 @@ export default async ({ strapi }: { strapi: Strapi & { admin: any } }) => {
   const defaultEventHubEmit = strapi.eventHub.emit;
   strapi.eventHub.emit = async (event: string, ...args) => {
     const data = args[0];
-    if (event === 'entry.update' && data.plugin?.id !== plugin.pluginId) {
+    if (supportsContentType(data.uid) && event === 'entry.update' && data.plugin?.id !== plugin.pluginId) {
       const entry = await strapi.query(data.uid).findOne({
         select: 'id', // Just select the id, we just need to know if it exists
         where: {
