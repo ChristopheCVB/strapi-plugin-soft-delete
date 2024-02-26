@@ -172,7 +172,7 @@ export default async ({ strapi }: { strapi: Strapi & { admin: any } }) => {
           deletedEntities.push(deletedEntity);
         }
         eventHubEmit({
-          uid: ctx.params.uid,
+          uid,
           event: 'entry.delete', // FIXME: Should this be entry.update?
           action: 'soft-delete',
           entity: deletedEntity,
